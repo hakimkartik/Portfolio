@@ -1,0 +1,315 @@
+{
+  "name": "Karttik Hakimm",
+  "title": "Senior Software Engineer",
+  "contact": {
+    "email": "hakimmkarttik@zohomail.in",
+    "location": "Austin, TX",
+    "linkedin": "https://linkedin.com/in/kartik-hakim",
+    "github": "https://github.com/hakimkartik"
+  },
+  "summary": "A results-driven Software Engineer with 6+ years of experience at leading companies like Amazon, Licious Private Limited, and Sprinklr. Expertise in designing and implementing scalable, distributed systems, automating CI/CD workflows, and optimizing databases to drive significant improvements in operational efficiency and user satisfaction. Technical depth includes Python, Java, AWS, Kubernetes, Terraform, and proficiency across full-stack development, cloud infrastructure, and MLOps principles.",
+  "experience": [
+    {
+      "company": "Sprinklr, Inc",
+      "role": "Senior Software Engineer",
+      "location": "Austin, TX",
+      "from": "2025-04",
+      "to": "Present",
+      "emoji": "🚀",
+      "bullets": [
+        "Accelerated customer onboarding time by 98% (from 7 days to 3 hours) by designing and developing the end-to-end platform, Atlas, for the new Telephony product, utilizing Terraform, Terragrunt, Docker, and Flask.",
+        "Implemented an in-house RAG + LLM backed Teams Chatbot supporting MCP client service architecture, reducing developer overhead by 25-30%. This was built using FastAPI, VLLM, Ollama, and Qwen.",
+        "Designed and implemented a horizontal autoscaler for in-house Telephony services, enabling scaling from 1.2M calls/month to 3M calls/month, leveraging K8s, GKE, Flask, RtpEngine, and Freeswitch."
+      ]
+    },
+    {
+      "company": "Easley Dunn Productions Inc",
+      "role": "Backend Engineer",
+      "location": "Los Angeles, CA",
+      "from": "2024-07",
+      "to": "2025-04",
+      "emoji": "🎬",
+      "bullets": [
+        "Responsible for managing Jenkins and Assembla deployment pipelines and creating game level-designs using C# and Jupyter notebooks.",
+        "Designed and implemented new analytics using Flask, Google Firebase, and Looker Studio for enhancing user engagement.",
+        "Developed a heat map dashboard service depicting user engagement using a sidecar design pattern with Prometheus and FastAPI."
+      ]
+    },
+    {
+      "company": "Amazon",
+      "role": "Software Development Engineer Intern",
+      "location": "Irvine, CA",
+      "from": "2023-05",
+      "to": "2023-08",
+      "emoji": "📦",
+      "bullets": [
+        "Collaborated with the customer management team to design and implement an automated Redshift query execution workflow.",
+        "Deployed the workflow using AWS StepFunctions and AWS CDK, enabling dynamic query generation and execution in under 30 seconds.",
+        "Leveraged SQL optimization and database management expertise to reduce Redshift database query times, resulting in a 15% improvement in page load speeds."
+      ]
+    },
+    {
+      "company": "Fundr Games",
+      "role": "Senior Technical Advisor",
+      "location": "Los Angeles, CA",
+      "from": "2022-09",
+      "to": "2023-02",
+      "emoji": "🎮",
+      "bullets": [
+        "Worked with the founders to develop service to host and publish indie games, using SailsJS, React, NextJS.",
+        "Implemented customized algorithm for game developers to reach out to market their game and promote it on several social media platforms, reducing the turn-around time from 7 days to 24-48 hrs (Facebook, Instagram, Discord)."
+      ]
+    },
+    {
+      "company": "Licious Private Limited",
+      "role": "Software Development Engineer 2",
+      "location": "Bengaluru, KA",
+      "from": "2021-08",
+      "to": "2022-07",
+      "emoji": "🍖",
+      "bullets": [
+        "Utilized VueJS to design and implement responsive user interfaces, resulting in a 15% boost in user satisfaction scores by enhancing usability and aesthetics.",
+        "Spearheaded an agile team in developing an efficient in-house user authentication gateway using Spring Security, achieving a 25% reduction in login time through optimized security processes.",
+        "Designed and deployed a user-segmentation service using AWS Lambda, Firebase, and Spring Batch, leading to a 20% increase in customer engagement."
+      ]
+    },
+    {
+      "company": "Sprinklr, Inc.",
+      "role": "Software Engineer",
+      "location": "Bengaluru, KA",
+      "from": "2017-07",
+      "to": "2021-08",
+      "emoji": "💼",
+      "bullets": [
+        "Developed and deployed automation APIs for efficient data migration (Solr to Elasticsearch; Cassandra to Scylla), achieving a 45% increase in speed.",
+        "Implemented a high-availability Redis architecture with Sentinel, resulting in enhanced system reliability and generating $3k in direct monthly profits.",
+        "Engineered Python modules to facilitate the dynamic provisioning of Jenkins slaves in Azure, generating $9k in monthly profits by optimizing resource utilization.",
+        "Designed and executed a payment gateway solution using a microservices architecture in Node.js, enhancing API response times by 25% and decreasing server load by 30%."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Vulnerability Scanning Tool",
+      "tech": ["Python", "Django", "Docker API", "Clair API", "Trivy API", "SNS", "VueJS", "Bootstrap", "CSS", "HTML"],
+      "description": "Developed and implemented a full-stack application having REST APIs using Django, targeting the scanning of deployed Docker images for vulnerabilities (integrating Clair and Trivy APIs). Created a visualization dashboard with a CSV export and email-sharing feature for timely security dissemination to banking stakeholders. Enhanced stakeholder engagement and response efficiency by developing an email-sharing option for the dashboard, ensuring that critical vulnerability information is promptly and securely communicated to relevant parties."
+    },
+    {
+      "name": "User Authentication Service",
+      "tech": ["Spring Batch", "Spring Security", "SailsJS", "ExpressJS", "OAuth", "GCP", "RBAC", "JWTs"],
+      "description": "Designed and developed hybrid user authentication web services which used JSON Web Token (JWTs) along with Google OAuth. Implemented a decentralized architecture to store and process user and employee roles and permissions which were used to authenticate clients as well as employees accessing public and private services using Spring Batch along with MySQL and MongoDB. Using Spring Batch implemented periodic updates of user roles and permissions submitted by different teams after they have been verified by respective stakeholders. Implemented a centralized logging feature to keep track of changes to user permissions and pushed all actions to InfluxDB for easy debugging. Added integrations to core codebase in SailsJS and ExpressJS for all internal platforms to use the new authentication service and work efficiently."
+    },
+    {
+      "name": "Split Screen Runner",
+      "tech": ["Unity", "C#", "TextMeshPro", "Animations", "Particle Effects", "Post Processing", "Plotly Dash"],
+      "description": "Led a team of 4 to design and develop a 2D platformer game with inversion control as core mechanic, using Unity Play and deployed using GitHub Pages and Actions. Implemented the user analytics and generated hypothesis to enhance user engagement and experience using Flask based REST APIs and created plots using Plotly."
+    },
+    {
+      "name": "Fundr Games MVP",
+      "tech": ["React", "Next.js", "AWS (S3, Route53, ELB)", "SailsJS", "Docker", "Postgres"],
+      "description": "As part of USC Incubator, worked with Fundr Games founders to develop service to host and publish indie games. Implemented customized algorithm for game developers to reach out to market their game and promote it on several social media platforms (Facebook, Instagram, Discord)."
+    }
+  ],
+  "skills": {
+    "Programming Languages": [
+      "C/C++",
+      "JavaScript",
+      "Java",
+      "Python",
+      "Rust",
+      "Go",
+      "Bash",
+      "Perl",
+      "Groovy",
+      "C#",
+      "PHP",
+      "TypeScript",
+      "Angular",
+      "Ruby",
+      "Kotlin",
+      "R",
+      "CUDA",
+      "D3.js"
+    ],
+    "Web Frameworks": [
+      "ReactJS",
+      "VueJS",
+      "NodeJS",
+      "Django",
+      "Flask",
+      "Spring Boot",
+      "Hibernate",
+      "Mojolicious",
+      "Laravel",
+      "SailsJS",
+      "ExpressJS",
+      "Next.js",
+      "JUnit",
+      "Mockito",
+      "JMeter",
+      "Ruby on Rails",
+      "Selenium"
+    ],
+    "Cloud Technologies": [
+      "AWS (EC2, S3, EKS, CloudFront, Fargate, Lambda, StepFunction, SNS, ElastiCache, Redshift, RDS, CloudFormation, DynamoDB, CloudWatch, ECS)",
+      "Azure",
+      "GCP (Google Cloud Platform)",
+      "BigQuery",
+      "Databricks",
+      "BigTable"
+    ],
+    "Infrastructure Technologies": [
+      "Ansible",
+      "Kubernetes (K8s)",
+      "Docker",
+      "Jenkins",
+      "Gitlab",
+      "Gradle",
+      "Maven",
+      "PostgreSQL",
+      "Graylog",
+      "Sensu",
+      "Prometheus",
+      "Terraform",
+      "Apache Spark",
+      "Hadoop",
+      "Apache Kafka",
+      "Parquet",
+      "Vault",
+      "Helm",
+      "gRPC",
+      "Apache Airflow",
+      "LDAP"
+    ],
+    "Concepts": [
+      "Web Crawler",
+      "Inverted Index",
+      "Big Data",
+      "DNS",
+      "Distributed System/Computing",
+      "Operating System",
+      "Virtual Memory",
+      "Cache Memory",
+      "Encryption",
+      "Decryption",
+      "Neural Networks",
+      "Database Normalization",
+      "Agile Development Methodology",
+      "Cloud Infrastructure",
+      "Cloud Computing",
+      "VPN",
+      "CDN",
+      "Software Development LifeCycle (SDLC)",
+      "Continuous Integration Continuous Development (CI/CD)",
+      "Full Stack Development",
+      "Containerization",
+      "Git Version Control",
+      "Product Engineering",
+      "Product Management",
+      "Linux Systems",
+      "DevOps",
+      "Object Oriented Programming (OOPs)",
+      "Design Patterns",
+      "Design Reviews",
+      "Functional Programming",
+      "SRE",
+      "System Design",
+      "Platform Engineering",
+      "UI/UX",
+      "Server Side Development",
+      "Software Design",
+      "CRM",
+      "Scalability",
+      "Algorithms",
+      "NoSQL",
+      "Data Structures",
+      "SaaS",
+      "Data Architecture",
+      "Fintech",
+      "Data Storage",
+      "Web Applications",
+      "Data Analytics",
+      "Features Development",
+      "Technical Expertise",
+      "Software Engineering Patterns",
+      "Web Technologies",
+      "SSL",
+      "TLS",
+      "JIRA",
+      "Service Level Agreements (SLA)",
+      "Relational Databases",
+      "Messaging Queues",
+      "Internal tools",
+      "Caching"
+    ],
+    "Interpersonal Skills": [
+      "Product Development",
+      "Product Design",
+      "Project Management",
+      "Leadership",
+      "Collaboration",
+      "Code Review",
+      "Teamwork",
+      "Problem Solving",
+      "Excellent Verbal and Written Communication Skills",
+      "Adaptability",
+      "Flexible",
+      "Collaborative",
+      "Self-Driven",
+      "Detail-Oriented",
+      "Highly Motivated",
+      "Cross-Functional Team",
+      "Reliability",
+      "Innovative",
+      "Troubleshooting",
+      "Accountability",
+      "Communication Skills",
+      "Mentoring",
+      "Resilient",
+      "Research Oriented",
+      "Pragmatic",
+      "Customer Experience",
+      "Analytical",
+      "Critical Thinking",
+      "Innovation",
+      "Constructive Feedback",
+      "Highly Competitive",
+      "Industry Trends",
+      "Strong Technical Skill",
+      "Logistics and Event Planning",
+      "Fast Paced Environment",
+      "Process Improvement",
+      "User Research",
+      "Team Building",
+      "Mentorship",
+      "Agility"
+    ]
+  },
+  "education": [
+    {
+      "school": "University of Southern California",
+      "degree": "MS, Computer Science",
+      "from": "2022-08",
+      "to": "2024-12",
+      "logo": "https://brand.usc.edu/wp-content/uploads/2020/02/USC_Shield_375x375.png",
+      "emoji": "🎓"
+    },
+    {
+      "school": "BMS College of Engineering",
+      "degree": "BE, Computer Science",
+      "from": "2013-08",
+      "to": "2017-04",
+      "logo": "https://www.bmsce.ac.in/assets/images/logo.png",
+      "emoji": "🏛️"
+    }
+  ],
+  "certifications": [
+    "RU202: Redis Streams",
+    "M103: MongoDB Basic Cluster Administration",
+    "Natural Language Processing (NLP) with Python",
+    "Hands-on PyTorch Machine Learning",
+    "gRPC in Python",
+    "Building a Recommendation System with Python Machine Learning & AI"
+  ]
+}
+

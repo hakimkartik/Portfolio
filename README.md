@@ -27,9 +27,13 @@ This portfolio website presents resume data in a unique, developer-friendly way.
 ### Interactive Features
 - **Copy to Clipboard**: One-click copy of any format
 - **Download**: Download resume as JSON, YAML, or TOML file
-- **Theme Toggle**: Switch between dark and light themes
+- **PDF Export**: Export card view as PDF
+- **Search/Filter**: Search across experience, projects, skills, education, and certifications with text highlighting
+- **Theme Toggle**: Switch between dark and light themes (persisted in localStorage)
 - **Syntax Highlighting**: Beautiful code highlighting for all formats
 - **Toast Notifications**: User-friendly feedback for actions
+- **Keyboard Shortcuts**: Press `j` for JSON, `y` for YAML, `t` for TOML, `c` for Card view, `Esc` to clear search
+- **Scroll to Top**: Button appears when scrolling down
 
 ### Responsive Design
 - **Mobile-First**: Optimized for phones (iOS & Android)
@@ -41,8 +45,11 @@ This portfolio website presents resume data in a unique, developer-friendly way.
 
 ### Card View Enhancements
 - **Netflix-Style Layout**: Multiple horizontal scrolling rows
+- **Timeline with Emojis**: Visual timeline with company emojis/logos connected via branches
+- **Year Labels**: Year ranges displayed on timeline branches
 - **Hover Effects**: Cards magnify (1.08x scale) with backlight glow on hover
-- **Centered Alignment**: Cards are centered and wider for better visibility
+- **Centered Alignment**: All sections (experience, projects, skills, education, certifications) are centered
+- **Education Logos**: School logos/emojis displayed in education cards
 - **Spacing**: Generous spacing prevents overlap when cards magnify
 
 ## 📚 Libraries & Technologies
@@ -71,6 +78,11 @@ This portfolio website presents resume data in a unique, developer-friendly way.
 - **prismjs 1.30.0** - Syntax highlighter
   - *Why*: Lightweight, extensible, supports JSON, YAML, and TOML syntax highlighting
   - Includes custom theme colors for both dark and light modes
+
+### PDF Export
+- **html2canvas** - Convert HTML to canvas
+- **jspdf** - Generate PDF from canvas
+  - *Why*: Enable users to export their resume as PDF from the card view
 
 ### Development Tools
 - **vue-tsc 3.0.5** - TypeScript type checking for Vue
@@ -104,7 +116,7 @@ This portfolio website presents resume data in a unique, developer-friendly way.
 ### Theme Features
 - **Automatic Detection**: Respects system preference on first load
 - **Manual Toggle**: Sun/moon icon in header to switch themes
-- **Persistent**: Theme preference could be saved to localStorage (future enhancement)
+- **Persistent**: Theme preference saved to localStorage
 - **Smooth Transitions**: All color changes are animated
 
 ## 🖼️ Visual Design
@@ -135,9 +147,11 @@ This portfolio website presents resume data in a unique, developer-friendly way.
    - Easy to scan and read
 
 5. **Education & Certifications**
-   - Side-by-side layout on desktop
+   - Centered layout with side-by-side cards on desktop
+   - School logos/emojis displayed
    - Stacked on mobile
    - Clean card design
+   - Sections hidden when no search matches
 
 ### Code View Layout
 - **Monospace Font**: Courier New for code readability
@@ -171,61 +185,6 @@ npm run preview
 
 The app will be available at `http://localhost:5173/`
 
-## 📦 Deployment to GitHub Pages
-
-### Automatic Deployment (Recommended)
-
-The repository includes a GitHub Actions workflow that automatically deploys to GitHub Pages when you push to the `main` branch.
-
-1. **Enable GitHub Pages**:
-   - Go to your repository settings
-   - Navigate to "Pages" section
-   - Under "Source", select "GitHub Actions"
-
-2. **Push your code**:
-   ```bash
-   git add .
-   git commit -m "Deploy to GitHub Pages"
-   git push origin main
-   ```
-
-3. **Monitor deployment**:
-   - Go to the "Actions" tab in your repository
-   - Watch the workflow run and deploy
-
-### Manual Deployment
-
-If you prefer manual deployment:
-
-1. **Build the project**:
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy the `dist` folder**:
-   - Option A: Use `gh-pages` package
-     ```bash
-     npm install --save-dev gh-pages
-     # Add to package.json scripts: "deploy": "gh-pages -d dist"
-     npm run deploy
-     ```
-   
-   - Option B: Push `dist` folder to `gh-pages` branch
-     ```bash
-     git subtree push --prefix dist origin gh-pages
-     ```
-
-3. **Configure GitHub Pages**:
-   - Go to repository Settings → Pages
-   - Select source branch (usually `gh-pages` or `main` with `/dist` folder)
-
-### Important Notes
-
-- The `base` path in `vite.config.ts` is set to `/Portfolio/` to match your repository name
-- If your repository name is different, update the `base` path accordingly
-- The `.nojekyll` file ensures GitHub Pages serves all files correctly
-- After deployment, your site will be available at: `https://hakimkartik.github.io/Portfolio/`
-
 ## 📱 Responsive Breakpoints
 
 - **Extra Small** (< 480px): Mobile phones in portrait
@@ -237,23 +196,23 @@ If you prefer manual deployment:
 ## 🎯 What Can Be Improved
 
 ### Short-term Enhancements
-1. **Theme Persistence**: Save theme preference to localStorage
-2. **Search/Filter**: Add search functionality in card view
-3. **Print Styles**: Optimize print stylesheet for resume printing
+1. ~~**Theme Persistence**: Save theme preference to localStorage~~ ✅ Implemented
+2. ~~**Search/Filter**: Add search functionality in card view~~ ✅ Implemented
+3. ~~**Print Styles**: Optimize print stylesheet for resume printing~~ ✅ Implemented
 4. **Loading States**: Add skeleton loaders for better perceived performance
 5. **Error Boundaries**: Better error handling and user feedback
-6. **Accessibility**: 
-   - ARIA labels for screen readers
+6. ~~**Accessibility**: 
+   - ARIA labels for screen readers~~ ✅ Implemented
    - Keyboard navigation improvements
    - Focus indicators
 
 ### Medium-term Features
-1. **Data Source**: Load resume data from API or JSON file
-2. **Export Options**: PDF export functionality
+1. ~~**Data Source**: Load resume data from API or JSON file~~ ✅ Implemented (JSON file)
+2. ~~**Export Options**: PDF export functionality~~ ✅ Implemented
 3. **Animation**: More sophisticated page transitions
 4. **Internationalization**: Multi-language support
 5. **Analytics**: Optional analytics integration
-6. **SEO**: Meta tags, Open Graph, structured data
+6. ~~**SEO**: Meta tags, Open Graph, structured data~~ ✅ Implemented
 
 ### Long-term Improvements
 1. **Admin Panel**: Web interface to edit resume data

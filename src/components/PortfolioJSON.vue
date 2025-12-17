@@ -2,12 +2,15 @@
   <v-main :class="theme.global.name.value === 'dark' ? 'bg-grey-darken-4' : 'bg-grey-lighten-5'">
     <v-container fluid class="pa-0">
       <div class="d-flex flex-column" style="min-height: 100vh">
-        <!-- Simple Header -->
-        <div class="d-flex flex-column flex-md-row justify-space-between align-center align-md-center pa-4 pa-md-6 ga-4 header-responsive">
-          <div class="text-h5 text-h6-sm font-weight-light header-name" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
-            {{ resumeData.name }}
-          </div>
-          <div class="d-flex align-center ga-2 ga-md-4 flex-wrap justify-center header-controls">
+        <!-- Netflix-Style Header -->
+        <div class="netflix-header" :class="{ 'scrolled': showScrollTop }">
+          <div class="netflix-header-content">
+            <div class="netflix-logo" @click="scrollToTop">
+              <span class="netflix-logo-text" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
+                {{ resumeData.name }}
+              </span>
+            </div>
+            <div class="d-flex align-center ga-2 ga-md-4 flex-wrap justify-center header-controls">
             <!-- Format Toggle Switch -->
             <div class="d-flex align-center ga-1" :style="`border: 1px solid ${theme.global.name.value === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}; border-radius: 24px; padding: 2px;`">
               <v-btn
@@ -17,6 +20,7 @@
                 size="small"
                 class="text-caption format-btn px-2 px-sm-3 px-md-4"
                 :style="{ minWidth: '44px', minHeight: '44px' }"
+                aria-label="Switch to JSON format (Press J)"
               >
                 JSON
               </v-btn>
@@ -27,6 +31,7 @@
                 size="small"
                 class="text-caption format-btn px-2 px-sm-3 px-md-4"
                 :style="{ minWidth: '44px', minHeight: '44px' }"
+                aria-label="Switch to YAML format (Press Y)"
               >
                 YAML
               </v-btn>
@@ -37,6 +42,7 @@
                 size="small"
                 class="text-caption format-btn px-2 px-sm-3 px-md-4"
                 :style="{ minWidth: '44px', minHeight: '44px' }"
+                aria-label="Switch to TOML format (Press T)"
               >
                 TOML
               </v-btn>
@@ -47,6 +53,7 @@
                 size="small"
                 class="text-caption format-btn px-2 px-sm-3 px-md-4"
                 :style="{ minWidth: '44px', minHeight: '44px' }"
+                aria-label="Switch to Card view (Press C)"
               >
                 CARD
               </v-btn>
@@ -61,6 +68,7 @@
               :icon="theme.global.name.value === 'dark' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
               :style="{ minWidth: '44px', minHeight: '44px' }"
               class="action-btn"
+              :aria-label="`Switch to ${theme.global.name.value === 'dark' ? 'light' : 'dark'} theme`"
             >
             </v-btn>
             <v-btn
@@ -70,6 +78,7 @@
               :loading="copyLoading"
               :style="{ minWidth: '44px', minHeight: '44px' }"
               class="action-btn"
+              aria-label="Copy to clipboard"
             >
               <v-icon start size="small">mdi-content-copy</v-icon>
               <span class="d-none d-sm-inline">Copy</span>
@@ -81,12 +90,30 @@
               :loading="downloadLoading"
               :style="{ minWidth: '44px', minHeight: '44px' }"
               class="action-btn"
+              aria-label="Download file"
             >
               <v-icon start size="small">mdi-download</v-icon>
               <span class="d-none d-sm-inline">Download</span>
             </v-btn>
+            <v-btn
+              v-if="format === 'card'"
+              @click="handlePDFExport"
+              variant="text"
+              size="small"
+              :loading="pdfLoading"
+              :style="{ minWidth: '44px', minHeight: '44px' }"
+              class="action-btn"
+              aria-label="Export to PDF"
+            >
+              <v-icon start size="small">mdi-file-pdf-box</v-icon>
+              <span class="d-none d-sm-inline">PDF</span>
+            </v-btn>
+            </div>
           </div>
         </div>
+        
+        <!-- Content starts here with padding for fixed header -->
+        <div class="main-content-wrapper">
 
         <!-- Format Display -->
         <div v-if="format !== 'card'" class="flex-grow-1 pa-4 pa-md-6" style="overflow-y: auto; text-align: left;">
@@ -100,6 +127,27 @@
 
         <!-- Card View (Netflix-style) -->
         <div v-else class="flex-grow-1 card-view-container" style="overflow-y: auto;">
+          <!-- Search Bar (only in card view) -->
+          <div class="pa-4 pa-md-6 pb-2">
+            <div class="d-flex align-center ga-3">
+              <v-text-field
+                v-model="searchQuery"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search experience, projects, skills..."
+                variant="outlined"
+                density="compact"
+                clearable
+                hide-details
+                aria-label="Search portfolio content"
+                class="flex-grow-1"
+                @click:clear="searchQuery = ''"
+              />
+              <div v-if="searchQuery.trim()" class="search-results-count text-caption" :class="theme.global.name.value === 'dark' ? 'text-grey-lighten-1' : 'text-grey-darken-1'">
+                {{ searchResultsCount }} result{{ searchResultsCount !== 1 ? 's' : '' }}
+              </div>
+            </div>
+          </div>
+          
           <!-- Hero Section -->
           <div class="hero-section pa-8 pa-md-12 text-center">
             <h1 class="text-h3 text-md-h2 font-weight-bold mb-3" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
@@ -138,34 +186,65 @@
                 GitHub
               </v-chip>
             </div>
-            <p class="text-body-1 mx-auto mb-0" style="max-width: 800px; line-height: 1.8;" :class="theme.global.name.value === 'dark' ? 'text-grey-lighten-2' : 'text-grey-darken-1'">
+            <p class="text-body-1 mx-auto mb-0 text-center summary-text" style="max-width: 800px; line-height: 1.8;" :class="theme.global.name.value === 'dark' ? 'text-grey-lighten-2' : 'text-grey-darken-1'">
               {{ resumeData.summary }}
             </p>
           </div>
 
           <!-- Experience Section -->
-          <div class="section-container pa-6 pa-md-8">
+          <div class="section-container pa-6 pa-md-8 experience-section-wrapper" v-show="filteredExperience.length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Experience
             </h2>
-            <!-- Multiple horizontal scrolling rows (Netflix-style) -->
-            <div
-              v-for="(row, rowIndex) in experienceRows"
-              :key="rowIndex"
-              class="experience-row mb-6"
-            >
-              <div class="experience-scroll d-flex ga-6" style="overflow-x: auto; overflow-y: visible; padding: 8px 16px 24px 16px; justify-content: flex-start;">
-                <v-card
-                  v-for="(exp, index) in row"
-                  :key="`${rowIndex}-${index}`"
-                  class="experience-card flex-shrink-0"
-                  :width="cardWidth"
-                  variant="outlined"
+            
+            <!-- Timeline with branches and emojis -->
+            <div class="experience-timeline-container">
+              <!-- Vertical Timeline Line -->
+              <div class="timeline-line"></div>
+              
+              <!-- Experience Cards with Timeline Nodes -->
+              <div class="experience-cards-with-timeline">
+                <div
+                  v-for="(row, rowIndex) in filteredExperienceRows"
+                  :key="rowIndex"
+                  class="experience-row mb-6"
                 >
+                  <!-- Row Branch connecting to main timeline with Year Label -->
+                  <div class="timeline-row-branch">
+                    <div class="timeline-row-year">
+                      <span class="timeline-row-year-text">{{ getRowYearRange(row) }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="experience-scroll d-flex ga-6" style="overflow-x: auto; overflow-y: visible; padding: 8px 16px 24px 16px; justify-content: flex-start;">
+                    <div
+                      v-for="(exp, index) in row"
+                      :key="`${rowIndex}-${index}`"
+                      class="experience-card-wrapper"
+                    >
+                      <!-- Timeline Node with Emoji/Logo -->
+                      <div class="timeline-node">
+                        <div class="timeline-node-connector"></div>
+                        <div class="timeline-node-icon">
+                          <span v-if="exp.emoji" class="timeline-emoji">{{ exp.emoji }}</span>
+                          <v-avatar v-else-if="exp.logo" size="40" class="timeline-logo">
+                            <v-img :src="exp.logo" :alt="exp.company" />
+                          </v-avatar>
+                          <v-icon v-else size="24" color="primary">mdi-briefcase</v-icon>
+                        </div>
+                        <div class="timeline-node-branch"></div>
+                      </div>
+                      
+                      <!-- Experience Card -->
+                      <v-card
+                        class="experience-card flex-shrink-0"
+                        :width="cardWidth"
+                        variant="outlined"
+                      >
                   <v-card-title class="pb-2">
                     <div class="w-100">
-                      <div class="text-h6 mb-1">{{ exp.company }}</div>
-                      <div class="text-subtitle-2 text-grey">{{ exp.role }}</div>
+                      <div class="text-h6 mb-1" v-html="highlightText(exp.company, searchQuery)"></div>
+                      <div class="text-subtitle-2 text-grey" v-html="highlightText(exp.role, searchQuery)"></div>
                     </div>
                   </v-card-title>
                   <v-card-subtitle class="d-flex align-center ga-2 pt-0 pb-2">
@@ -177,24 +256,25 @@
                   <v-divider class="mx-4 mb-3"></v-divider>
                   <v-card-text class="pt-0">
                     <ul class="pl-4 mb-0" style="list-style-type: disc;">
-                      <li v-for="(bullet, i) in exp.bullets" :key="i" class="mb-3 text-body-2" style="line-height: 1.6;">
-                        {{ bullet }}
-                      </li>
+                      <li v-for="(bullet, i) in exp.bullets" :key="i" class="mb-3 text-body-2" style="line-height: 1.6;" v-html="highlightText(bullet, searchQuery)"></li>
                     </ul>
                   </v-card-text>
                 </v-card>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Projects Section -->
-          <div class="section-container pa-6 pa-md-8">
+          <div class="section-container pa-6 pa-md-8" v-show="filteredProjects.length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Projects
             </h2>
             <v-row class="ma-0">
               <v-col
-                v-for="(project, index) in resumeData.projects"
+                v-for="(project, index) in filteredProjects"
                 :key="index"
                 cols="12"
                 sm="6"
@@ -206,7 +286,7 @@
                   variant="outlined"
                   hover
                 >
-                  <v-card-title class="pb-3">{{ project.name }}</v-card-title>
+                  <v-card-title class="pb-3" v-html="highlightText(project.name, searchQuery)"></v-card-title>
                   <v-card-text class="pt-0">
                     <div class="mb-4">
                       <v-chip
@@ -216,23 +296,45 @@
                         class="ma-1"
                         variant="tonal"
                       >
-                        {{ tech }}
+                        <span v-html="highlightText(tech, searchQuery)"></span>
                       </v-chip>
                     </div>
-                    <p class="text-body-2 mb-0" style="line-height: 1.6;">{{ project.description }}</p>
+                    <p class="text-body-2 mb-0" style="line-height: 1.6;" v-html="highlightText(project.description, searchQuery)"></p>
                   </v-card-text>
+                  <v-card-actions v-if="project.github || project.live">
+                    <v-btn
+                      v-if="project.github"
+                      :href="project.github"
+                      target="_blank"
+                      size="small"
+                      variant="text"
+                      prepend-icon="mdi-github"
+                    >
+                      Code
+                    </v-btn>
+                    <v-btn
+                      v-if="project.live"
+                      :href="project.live"
+                      target="_blank"
+                      size="small"
+                      variant="text"
+                      prepend-icon="mdi-open-in-new"
+                    >
+                      Live
+                    </v-btn>
+                  </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>
           </div>
 
           <!-- Skills Section -->
-          <div class="section-container pa-6 pa-md-8">
+          <div class="section-container pa-6 pa-md-8" v-show="Object.keys(filteredSkills).length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Skills
             </h2>
             <div
-              v-for="(skills, category) in resumeData.skills"
+              v-for="(skills, category) in filteredSkills"
               :key="category"
               class="mb-8"
             >
@@ -254,44 +356,95 @@
           </div>
 
           <!-- Education & Certifications -->
-          <div class="section-container pa-6 pa-md-8">
-            <v-row class="ma-0">
-              <v-col cols="12" md="6" class="pa-3 pa-md-4">
-                <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
+          <div class="section-container pa-6 pa-md-8" v-show="filteredEducation.length > 0 || filteredCertifications.length > 0">
+            <div class="education-certifications-wrapper">
+              <!-- Education Section -->
+              <div class="education-section" v-show="filteredEducation.length > 0">
+                <h2 class="text-h5 mb-5 section-title text-center" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
                   Education
                 </h2>
-                <v-card
-                  v-for="(edu, index) in resumeData.education"
-                  :key="index"
-                  class="mb-4"
-                  variant="outlined"
-                >
-                  <v-card-title class="text-subtitle-1 pb-1">{{ edu.school }}</v-card-title>
-                  <v-card-subtitle class="pb-1">{{ edu.degree }}</v-card-subtitle>
-                  <v-card-text class="text-caption pt-0">{{ edu.from }} - {{ edu.to }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="6" class="pa-3 pa-md-4">
-                <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
+                <div class="education-cards-container">
+                  <v-card
+                    v-for="(edu, index) in filteredEducation"
+                    :key="index"
+                    class="education-card"
+                    variant="outlined"
+                  >
+                    <v-card-text class="d-flex align-center pa-4">
+                      <div class="education-logo-wrapper mr-4">
+                        <div v-if="edu.emoji" class="education-emoji">
+                          {{ edu.emoji }}
+                        </div>
+                        <v-img 
+                          v-else-if="edu.logo"
+                          :src="edu.logo" 
+                          :alt="edu.school"
+                          class="education-logo-img"
+                          @error="handleLogoError"
+                          cover
+                        />
+                        <v-icon
+                          v-else
+                          size="64"
+                          color="primary"
+                          class="education-logo-icon"
+                        >
+                          mdi-school
+                        </v-icon>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="text-h6 mb-1">{{ edu.school }}</div>
+                        <div class="text-subtitle-2 text-grey mb-2">{{ edu.degree }}</div>
+                        <div class="text-caption">{{ edu.from }} - {{ edu.to }}</div>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </div>
+              </div>
+
+              <!-- Certifications Section -->
+              <div class="certifications-section" v-show="filteredCertifications.length > 0">
+                <h2 class="text-h5 mb-5 section-title text-center" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
                   Certifications
                 </h2>
-                <v-card
-                  v-for="(cert, index) in resumeData.certifications"
-                  :key="index"
-                  class="mb-4"
-                  variant="outlined"
-                >
-                  <v-card-text class="d-flex align-center">
-                    <v-icon class="mr-3" color="primary" size="small">mdi-certificate</v-icon>
-                    <span class="text-body-2">{{ cert }}</span>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
+                <div class="d-flex justify-center flex-wrap ga-3">
+                  <v-card
+                    v-for="(cert, index) in filteredCertifications"
+                    :key="index"
+                    class="certification-card"
+                    variant="outlined"
+                    min-width="280"
+                    max-width="100%"
+                  >
+                    <v-card-text class="d-flex align-center pa-3">
+                      <v-icon class="mr-3" color="primary" size="small">mdi-certificate</v-icon>
+                      <span class="text-body-2">{{ cert }}</span>
+                    </v-card-text>
+                  </v-card>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </v-container>
+
+    <!-- Scroll to Top Button -->
+    <v-fade-transition>
+      <v-btn
+        v-show="showScrollTop"
+        @click="scrollToTop"
+        icon
+        size="large"
+        color="primary"
+        class="scroll-to-top-btn"
+        aria-label="Scroll to top"
+        style="position: fixed; bottom: 24px; right: 24px; z-index: 1000;"
+      >
+        <v-icon>mdi-arrow-up</v-icon>
+      </v-btn>
+    </v-fade-transition>
 
     <!-- Toast Notification -->
     <v-snackbar
@@ -313,7 +466,7 @@
   </v-main>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { useTheme } from "vuetify";
 import * as yaml from "js-yaml";
@@ -322,26 +475,117 @@ import Prism from "prismjs";
 import "prismjs/components/prism-json";
 import "prismjs/components/prism-yaml";
 import "prismjs/components/prism-toml";
+import type { ResumeData } from "@/types/resume";
+import resumeDataJson from "@/data/resume.json";
 
 const theme = useTheme();
-const format = ref("json");
-const codeBlock = ref(null);
+const format = ref<"json" | "yaml" | "toml" | "card">("json");
+const codeBlock = ref<HTMLElement | null>(null);
 const copyLoading = ref(false);
 const downloadLoading = ref(false);
+const pdfLoading = ref(false);
 const windowWidth = ref(window.innerWidth);
+const searchQuery = ref("");
+const showScrollTop = ref(false);
 const snackbar = ref({
   show: false,
   message: "",
   color: "success",
 });
 
+// Load resume data with type safety
+const resumeData = resumeDataJson as ResumeData;
+
 // Update window width on resize for responsive calculations
 const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
 
+// Scroll to top functionality
+const handleScroll = () => {
+  showScrollTop.value = window.scrollY > 300;
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Highlight search terms in text
+const highlightText = (text: string, query: string): string => {
+  if (!query || !query.trim()) {
+    return text;
+  }
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+};
+
+// Handle logo loading errors - show emoji or icon fallback
+const handleLogoError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  if (img && img.parentElement) {
+    // Hide the failed image
+    img.style.display = 'none';
+    
+    // Try to find the education data to get emoji
+    const card = img.closest('.education-card');
+    if (card) {
+      const cardIndex = Array.from(card.parentElement?.children || []).indexOf(card);
+      const edu = resumeData.education[cardIndex];
+      
+      if (edu?.emoji) {
+        // Show emoji fallback
+        const emojiDiv = document.createElement('div');
+        emojiDiv.className = 'education-emoji';
+        emojiDiv.textContent = edu.emoji;
+        img.parentElement?.appendChild(emojiDiv);
+      } else {
+        // Show icon fallback
+        const icon = document.createElement('div');
+        icon.innerHTML = '<v-icon size="64" color="primary">mdi-school</v-icon>';
+        img.parentElement?.appendChild(icon);
+      }
+    }
+  }
+};
+
+// Theme persistence
+// Keyboard shortcuts
+const handleKeydown = (event: KeyboardEvent) => {
+  // Only handle shortcuts when not typing in input fields
+  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+    return;
+  }
+  
+  // Format shortcuts: j=JSON, y=YAML, t=TOML, c=Card
+  if (event.key === 'j' && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    format.value = 'json';
+  } else if (event.key === 'y' && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    format.value = 'yaml';
+  } else if (event.key === 't' && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    format.value = 'toml';
+  } else if (event.key === 'c' && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    format.value = 'card';
+  } else if (event.key === 'Escape') {
+    // Clear search on Escape
+    searchQuery.value = '';
+  }
+};
+
 onMounted(() => {
   window.addEventListener('resize', handleResize);
+  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('scroll', handleScroll);
+  
+  // Load saved theme preference
+  const savedTheme = localStorage.getItem('portfolio-theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    theme.global.name.value = savedTheme;
+  }
+  
   if (format.value !== 'card') {
     highlightCode();
   }
@@ -349,344 +593,39 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('scroll', handleScroll);
 });
 
 const toggleTheme = () => {
-  theme.global.name.value = theme.global.name.value === 'dark' ? 'light' : 'dark';
+  const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark';
+  theme.global.name.value = newTheme;
+  // Save theme preference
+  localStorage.setItem('portfolio-theme', newTheme);
   // Re-highlight after theme change
   nextTick(() => {
     highlightCode();
   });
 };
 
-const toggleFormat = () => {
-  format.value = format.value === 'json' ? 'yaml' : 'json';
-};
 
 const highlightCode = () => {
   nextTick(() => {
     if (codeBlock.value) {
-      Prism.highlightElement(codeBlock.value.querySelector('code'));
+      const codeElement = codeBlock.value.querySelector('code');
+      if (codeElement) {
+        Prism.highlightElement(codeElement);
+      }
     }
   });
 };
 
-const showSnackbar = (message, color = "success") => {
+const showSnackbar = (message: string, color: string = "success") => {
   snackbar.value = {
     show: true,
     message,
     color,
   };
-};
-
-const resumeData = {
-  name: "Karttik Hakimm",
-  title: "Senior Software Engineer",
-  contact: {
-    email: "hakimmkarttik@zohomail.in",
-    location: "Austin, TX",
-    linkedin: "https://linkedin.com/in/kartik-hakim",
-    github: "https://github.com/hakimkartik",
-  },
-  summary:
-    "A results-driven Software Engineer with 6+ years of experience at leading companies like Amazon, Licious Private Limited, and Sprinklr. Expertise in designing and implementing scalable, distributed systems, automating CI/CD workflows, and optimizing databases to drive significant improvements in operational efficiency and user satisfaction. Technical depth includes Python, Java, AWS, Kubernetes, Terraform, and proficiency across full-stack development, cloud infrastructure, and MLOps principles.",
-  experience: [
-    {
-      company: "Sprinklr, Inc",
-      role: "Senior Software Engineer",
-      location: "Austin, TX",
-      from: "2025-04",
-      to: "Present",
-      bullets: [
-        "Accelerated customer onboarding time by 98% (from 7 days to 3 hours) by designing and developing the end-to-end platform, Atlas, for the new Telephony product, utilizing Terraform, Terragrunt, Docker, and Flask.",
-        "Implemented an in-house RAG + LLM backed Teams Chatbot supporting MCP client service architecture, reducing developer overhead by 25-30%. This was built using FastAPI, VLLM, Ollama, and Qwen.",
-        "Designed and implemented a horizontal autoscaler for in-house Telephony services, enabling scaling from 1.2M calls/month to 3M calls/month, leveraging K8s, GKE, Flask, RtpEngine, and Freeswitch.",
-      ],
-    },
-    {
-      company: "Easley Dunn Productions Inc",
-      role: "Backend Engineer",
-      location: "Los Angeles, CA",
-      from: "2024-07",
-      to: "2025-04",
-      bullets: [
-        "Responsible for managing Jenkins and Assembla deployment pipelines and creating game level-designs using C# and Jupyter notebooks.",
-        "Designed and implemented new analytics using Flask, Google Firebase, and Looker Studio for enhancing user engagement.",
-        "Developed a heat map dashboard service depicting user engagement using a sidecar design pattern with Prometheus and FastAPI.",
-      ],
-    },
-    {
-      company: "Amazon",
-      role: "Software Development Engineer Intern",
-      location: "Irvine, CA",
-      from: "2023-05",
-      to: "2023-08",
-      bullets: [
-        "Collaborated with the customer management team to design and implement an automated Redshift query execution workflow.",
-        "Deployed the workflow using AWS StepFunctions and AWS CDK, enabling dynamic query generation and execution in under 30 seconds.",
-        "Leveraged SQL optimization and database management expertise to reduce Redshift database query times, resulting in a 15% improvement in page load speeds.",
-      ],
-    },
-    {
-      company: "Fundr Games",
-      role: "Senior Technical Advisor",
-      location: "Los Angeles, CA",
-      from: "2022-09",
-      to: "2023-02",
-      bullets: [
-        "Worked with the founders to develop service to host and publish indie games, using SailsJS, React, NextJS.",
-        "Implemented customized algorithm for game developers to reach out to market their game and promote it on several social media platforms, reducing the turn-around time from 7 days to 24-48 hrs (Facebook, Instagram, Discord).",
-      ],
-    },
-    {
-      company: "Licious Private Limited",
-      role: "Software Development Engineer 2",
-      location: "Bengaluru, KA",
-      from: "2021-08",
-      to: "2022-07",
-      bullets: [
-        "Utilized VueJS to design and implement responsive user interfaces, resulting in a 15% boost in user satisfaction scores by enhancing usability and aesthetics.",
-        "Spearheaded an agile team in developing an efficient in-house user authentication gateway using Spring Security, achieving a 25% reduction in login time through optimized security processes.",
-        "Designed and deployed a user-segmentation service using AWS Lambda, Firebase, and Spring Batch, leading to a 20% increase in customer engagement.",
-      ],
-    },
-    {
-      company: "Sprinklr, Inc.",
-      role: "Software Engineer",
-      location: "Bengaluru, KA",
-      from: "2017-07",
-      to: "2021-08",
-      bullets: [
-        "Developed and deployed automation APIs for efficient data migration (Solr to Elasticsearch; Cassandra to Scylla), achieving a 45% increase in speed.",
-        "Implemented a high-availability Redis architecture with Sentinel, resulting in enhanced system reliability and generating $3k in direct monthly profits.",
-        "Engineered Python modules to facilitate the dynamic provisioning of Jenkins slaves in Azure, generating $9k in monthly profits by optimizing resource utilization.",
-        "Designed and executed a payment gateway solution using a microservices architecture in Node.js, enhancing API response times by 25% and decreasing server load by 30%.",
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Vulnerability Scanning Tool",
-      tech: ["Python", "Django", "Docker API", "Clair API", "Trivy API", "SNS", "VueJS", "Bootstrap", "CSS", "HTML"],
-      description:
-        "Developed and implemented a full-stack application having REST APIs using Django, targeting the scanning of deployed Docker images for vulnerabilities (integrating Clair and Trivy APIs). Created a visualization dashboard with a CSV export and email-sharing feature for timely security dissemination to banking stakeholders. Enhanced stakeholder engagement and response efficiency by developing an email-sharing option for the dashboard, ensuring that critical vulnerability information is promptly and securely communicated to relevant parties.",
-    },
-    {
-      name: "User Authentication Service",
-      tech: ["Spring Batch", "Spring Security", "SailsJS", "ExpressJS", "OAuth", "GCP", "RBAC", "JWTs"],
-      description:
-        "Designed and developed hybrid user authentication web services which used JSON Web Token (JWTs) along with Google OAuth. Implemented a decentralized architecture to store and process user and employee roles and permissions which were used to authenticate clients as well as employees accessing public and private services using Spring Batch along with MySQL and MongoDB. Using Spring Batch implemented periodic updates of user roles and permissions submitted by different teams after they have been verified by respective stakeholders. Implemented a centralized logging feature to keep track of changes to user permissions and pushed all actions to InfluxDB for easy debugging. Added integrations to core codebase in SailsJS and ExpressJS for all internal platforms to use the new authentication service and work efficiently.",
-    },
-    {
-      name: "Split Screen Runner",
-      tech: ["Unity", "C#", "TextMeshPro", "Animations", "Particle Effects", "Post Processing", "Plotly Dash"],
-      description:
-        "Led a team of 4 to design and develop a 2D platformer game with inversion control as core mechanic, using Unity Play and deployed using GitHub Pages and Actions. Implemented the user analytics and generated hypothesis to enhance user engagement and experience using Flask based REST APIs and created plots using Plotly.",
-    },
-    {
-      name: "Fundr Games MVP",
-      tech: ["React", "Next.js", "AWS (S3, Route53, ELB)", "SailsJS", "Docker", "Postgres"],
-      description:
-        "As part of USC Incubator, worked with Fundr Games founders to develop service to host and publish indie games. Implemented customized algorithm for game developers to reach out to market their game and promote it on several social media platforms (Facebook, Instagram, Discord).",
-    },
-  ],
-  skills: {
-    "Programming Languages": [
-      "C/C++",
-      "JavaScript",
-      "Java",
-      "Python",
-      "Rust",
-      "Go",
-      "Bash",
-      "Perl",
-      "Groovy",
-      "C#",
-      "PHP",
-      "TypeScript",
-      "Angular",
-      "Ruby",
-      "Kotlin",
-      "R",
-      "CUDA",
-      "D3.js",
-    ],
-    "Web Frameworks": [
-      "ReactJS",
-      "VueJS",
-      "NodeJS",
-      "Django",
-      "Flask",
-      "Spring Boot",
-      "Hibernate",
-      "Mojolicious",
-      "Laravel",
-      "SailsJS",
-      "ExpressJS",
-      "Next.js",
-      "JUnit",
-      "Mockito",
-      "JMeter",
-      "Ruby on Rails",
-      "Selenium",
-    ],
-    "Cloud Technologies": [
-      "AWS (EC2, S3, EKS, CloudFront, Fargate, Lambda, StepFunction, SNS, ElastiCache, Redshift, RDS, CloudFormation, DynamoDB, CloudWatch, ECS)",
-      "Azure",
-      "GCP (Google Cloud Platform)",
-      "BigQuery",
-      "Databricks",
-      "BigTable",
-    ],
-    "Infrastructure Technologies": [
-      "Ansible",
-      "Kubernetes (K8s)",
-      "Docker",
-      "Jenkins",
-      "Gitlab",
-      "Gradle",
-      "Maven",
-      "PostgreSQL",
-      "Graylog",
-      "Sensu",
-      "Prometheus",
-      "Terraform",
-      "Apache Spark",
-      "Hadoop",
-      "Apache Kafka",
-      "Parquet",
-      "Vault",
-      "Helm",
-      "gRPC",
-      "Apache Airflow",
-      "LDAP",
-    ],
-    "Concepts": [
-      "Web Crawler",
-      "Inverted Index",
-      "Big Data",
-      "DNS",
-      "Distributed System/Computing",
-      "Operating System",
-      "Virtual Memory",
-      "Cache Memory",
-      "Encryption",
-      "Decryption",
-      "Neural Networks",
-      "Database Normalization",
-      "Agile Development Methodology",
-      "Cloud Infrastructure",
-      "Cloud Computing",
-      "VPN",
-      "CDN",
-      "Software Development LifeCycle (SDLC)",
-      "Continuous Integration Continuous Development (CI/CD)",
-      "Full Stack Development",
-      "Containerization",
-      "Git Version Control",
-      "Product Engineering",
-      "Product Management",
-      "Linux Systems",
-      "DevOps",
-      "Object Oriented Programming (OOPs)",
-      "Design Patterns",
-      "Design Reviews",
-      "Functional Programming",
-      "SRE",
-      "System Design",
-      "Platform Engineering",
-      "UI/UX",
-      "Server Side Development",
-      "Software Design",
-      "CRM",
-      "Scalability",
-      "Algorithms",
-      "NoSQL",
-      "Data Structures",
-      "SaaS",
-      "Data Architecture",
-      "Fintech",
-      "Data Storage",
-      "Web Applications",
-      "Data Analytics",
-      "Features Development",
-      "Technical Expertise",
-      "Software Engineering Patterns",
-      "Web Technologies",
-      "SSL",
-      "TLS",
-      "JIRA",
-      "Service Level Agreements (SLA)",
-      "Relational Databases",
-      "Messaging Queues",
-      "Internal tools",
-      "Caching",
-    ],
-    "Interpersonal Skills": [
-      "Product Development",
-      "Product Design",
-      "Project Management",
-      "Leadership",
-      "Collaboration",
-      "Code Review",
-      "Teamwork",
-      "Problem Solving",
-      "Excellent Verbal and Written Communication Skills",
-      "Adaptability",
-      "Flexible",
-      "Collaborative",
-      "Self-Driven",
-      "Detail-Oriented",
-      "Highly Motivated",
-      "Cross-Functional Team",
-      "Reliability",
-      "Innovative",
-      "Troubleshooting",
-      "Accountability",
-      "Communication Skills",
-      "Mentoring",
-      "Resilient",
-      "Research Oriented",
-      "Pragmatic",
-      "Customer Experience",
-      "Analytical",
-      "Critical Thinking",
-      "Innovation",
-      "Constructive Feedback",
-      "Highly Competitive",
-      "Industry Trends",
-      "Strong Technical Skill",
-      "Logistics and Event Planning",
-      "Fast Paced Environment",
-      "Process Improvement",
-      "User Research",
-      "Team Building",
-      "Mentorship",
-      "Agility",
-    ],
-  },
-  education: [
-    {
-      school: "University of Southern California",
-      degree: "MS, Computer Science",
-      from: "2022-08",
-      to: "2024-12",
-    },
-    {
-      school: "BMS College of Engineering",
-      degree: "BE, Computer Science",
-      from: "2013-08",
-      to: "2017-04",
-    },
-  ],
-  certifications: [
-    "RU202: Redis Streams",
-    "M103: MongoDB Basic Cluster Administration",
-    "Natural Language Processing (NLP) with Python",
-    "Hands-on PyTorch Machine Learning",
-    "gRPC in Python",
-    "Building a Recommendation System with Python Machine Learning & AI",
-  ],
 };
 
 const formattedContent = computed(() => {
@@ -695,24 +634,130 @@ const formattedContent = computed(() => {
   }
   if (format.value === 'toml') {
     try {
-      return TOML.stringify(resumeData, { newline: '\n', indent: 2 });
+      return TOML.stringify(resumeData as any, { newline: '\n', indent: 2 });
     } catch (error) {
       console.error('TOML stringify error:', error);
-      return `# Error converting to TOML: ${error.message}\n# Falling back to JSON\n${JSON.stringify(resumeData, null, 2)}`;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return `# Error converting to TOML: ${errorMessage}\n# Falling back to JSON\n${JSON.stringify(resumeData, null, 2)}`;
     }
   }
   return JSON.stringify(resumeData, null, 2);
 });
 
+// Search/filter functionality
+const filteredExperience = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return resumeData.experience;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return resumeData.experience.filter(exp => 
+    exp.company.toLowerCase().includes(query) ||
+    exp.role.toLowerCase().includes(query) ||
+    exp.location.toLowerCase().includes(query) ||
+    exp.from.toLowerCase().includes(query) ||
+    exp.to.toLowerCase().includes(query) ||
+    exp.bullets.some(bullet => bullet.toLowerCase().includes(query))
+  );
+});
+
+// Search results count
+const searchResultsCount = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return 0;
+  }
+  return filteredExperience.value.length + 
+         filteredProjects.value.length + 
+         Object.values(filteredSkills.value).flat().length +
+         filteredEducation.value.length +
+         filteredCertifications.value.length;
+});
+
+// Get year range for each row
+const getRowYearRange = (row: typeof resumeData.experience): string => {
+  if (row.length === 0) return '';
+  
+  const years = row.flatMap(exp => {
+    const fromYear = parseInt(exp.from.split('-')[0]);
+    const toYear = exp.to === 'Present' ? new Date().getFullYear() : parseInt(exp.to.split('-')[0]);
+    return [fromYear, toYear].filter(y => !isNaN(y));
+  });
+  
+  if (years.length === 0) return '';
+  
+  const minYear = Math.min(...years);
+  const maxYear = Math.max(...years);
+  
+  if (minYear === maxYear) {
+    return `${minYear}`;
+  }
+  
+  // Check if any experience is "Present"
+  const hasPresent = row.some(exp => exp.to === 'Present');
+  const displayMaxYear = hasPresent ? 'Present' : maxYear;
+  
+  return `${minYear} - ${displayMaxYear}`;
+};
+
+
+
+const filteredProjects = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return resumeData.projects;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return resumeData.projects.filter(project =>
+    project.name.toLowerCase().includes(query) ||
+    project.description.toLowerCase().includes(query) ||
+    project.tech.some(tech => tech.toLowerCase().includes(query))
+  );
+});
+
+const filteredSkills = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return resumeData.skills;
+  }
+  const query = searchQuery.value.toLowerCase();
+  const filtered: Record<string, string[]> = {};
+  Object.entries(resumeData.skills).forEach(([category, skills]) => {
+    const matchingSkills = skills.filter(skill => 
+      skill.toLowerCase().includes(query) || category.toLowerCase().includes(query)
+    );
+    if (matchingSkills.length > 0) {
+      filtered[category] = matchingSkills;
+    }
+  });
+  return filtered;
+});
+
+const filteredEducation = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return resumeData.education;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return resumeData.education.filter(edu =>
+    edu.school.toLowerCase().includes(query) ||
+    edu.degree.toLowerCase().includes(query) ||
+    edu.from.toLowerCase().includes(query) ||
+    edu.to.toLowerCase().includes(query)
+  );
+});
+
+const filteredCertifications = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return resumeData.certifications;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return resumeData.certifications.filter(cert =>
+    cert.toLowerCase().includes(query)
+  );
+});
+
 // Split experience into multiple rows (Netflix-style)
 // Each row contains multiple cards that scroll horizontally
 // We'll create rows with enough cards to enable horizontal scrolling
-const experienceRows = computed(() => {
-  const experiences = resumeData.experience;
+const filteredExperienceRows = computed(() => {
+  const experiences = filteredExperience.value;
   const rows = [];
-  // Determine how many cards fit on screen (for horizontal scrolling)
-  // Mobile: ~1 card visible, Tablet: ~2 cards, Desktop: ~3 cards
-  // We'll put 3-4 cards per row to enable scrolling
   const cardsPerRow = windowWidth.value < 600 ? 3 : windowWidth.value < 960 ? 4 : 5;
   
   for (let i = 0; i < experiences.length; i += cardsPerRow) {
@@ -782,20 +827,94 @@ const handleDownload = () => {
       mimeType = 'text/toml';
     }
     
-  const blob = new Blob([formattedContent.value], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `karttik_hakimm_resume.${extension}`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+    const blob = new Blob([formattedContent.value], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `karttik_hakimm_resume.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
     showSnackbar(`File downloaded successfully!`, "success");
   } catch (e) {
     showSnackbar("Download failed. Please try again.", "error");
   } finally {
     downloadLoading.value = false;
+  }
+};
+
+const handlePDFExport = async () => {
+  if (format.value !== 'card') {
+    showSnackbar("PDF export only available in card view", "info");
+    return;
+  }
+  
+  pdfLoading.value = true;
+  try {
+    // Dynamic import to reduce bundle size
+    const html2canvas = (await import('html2canvas')).default;
+    const jsPDF = (await import('jspdf')).jsPDF;
+    
+    const cardContainer = document.querySelector('.card-view-container') as HTMLElement;
+    if (!cardContainer) {
+      showSnackbar("Could not find content to export", "error");
+      return;
+    }
+    
+    // Hide search bar and header for PDF
+    const searchBar = cardContainer.querySelector('.v-text-field') as HTMLElement;
+    const originalDisplay = searchBar?.style.display;
+    if (searchBar) {
+      searchBar.style.display = 'none';
+    }
+    
+    const canvas = await html2canvas(cardContainer, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: theme.global.name.value === 'dark' ? '#121212' : '#ffffff',
+    });
+    
+    // Restore search bar
+    if (searchBar) {
+      searchBar.style.display = originalDisplay || '';
+    }
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgScaledWidth = imgWidth * ratio;
+    const imgScaledHeight = imgHeight * ratio;
+    
+    // Calculate how many pages we need
+    const pageCount = Math.ceil(imgScaledHeight / pdfHeight);
+    
+    for (let i = 0; i < pageCount; i++) {
+      if (i > 0) {
+        pdf.addPage();
+      }
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        -(i * pdfHeight),
+        imgScaledWidth,
+        imgScaledHeight
+      );
+    }
+    
+    pdf.save('karttik_hakimm_resume.pdf');
+    showSnackbar("PDF exported successfully!", "success");
+  } catch (error) {
+    console.error('PDF export error:', error);
+    showSnackbar("PDF export failed. Please try again.", "error");
+  } finally {
+    pdfLoading.value = false;
   }
 };
 
@@ -849,6 +968,15 @@ pre.code-block {
   padding-left: max(32px, env(safe-area-inset-left));
   padding-right: max(32px, env(safe-area-inset-right));
   padding-top: max(32px, env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.summary-text {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 .section-container {
@@ -869,6 +997,281 @@ pre.code-block {
   /* Touch-friendly sizing */
   min-height: 32px;
   padding: 4px 12px;
+}
+
+/* Timeline Styles */
+.experience-section-wrapper {
+  position: relative;
+}
+
+.experience-timeline-container {
+  position: relative;
+  padding-left: 100px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    rgba(25, 118, 210, 0.3) 0%,
+    rgba(25, 118, 210, 0.6) 50%,
+    rgba(25, 118, 210, 0.3) 100%
+  );
+  border-radius: 2px;
+  z-index: 0;
+}
+
+
+.experience-cards-with-timeline {
+  position: relative;
+  z-index: 1;
+}
+
+.experience-row {
+  position: relative;
+}
+
+.timeline-row-branch {
+  position: absolute;
+  left: -100px;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(25, 118, 210, 0.6),
+    rgba(25, 118, 210, 0.3)
+  );
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.timeline-row-year {
+  position: absolute;
+  left: -80px;
+  transform: translateX(-100%);
+  white-space: nowrap;
+}
+
+.timeline-row-year-text {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.15), rgba(25, 118, 210, 0.25));
+  border: 2px solid rgba(25, 118, 210, 0.4);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(25, 118, 210, 0.9);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+  backdrop-filter: blur(10px);
+  display: inline-block;
+}
+
+.v-theme--dark .timeline-row-year-text {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.15), rgba(100, 181, 246, 0.25));
+  border-color: rgba(100, 181, 246, 0.4);
+  color: rgba(100, 181, 246, 0.9);
+  box-shadow: 0 2px 8px rgba(100, 181, 246, 0.2);
+}
+
+.experience-card-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.timeline-node {
+  position: absolute;
+  left: -70px;
+  top: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.timeline-node-connector {
+  width: 15px;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(25, 118, 210, 0.6),
+    rgba(25, 118, 210, 0.3)
+  );
+}
+
+.timeline-node-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.2));
+  border: 3px solid rgba(25, 118, 210, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin: 0 8px;
+}
+
+.experience-card-wrapper:hover .timeline-node-icon {
+  transform: scale(1.15);
+  border-color: rgba(25, 118, 210, 0.8);
+  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+}
+
+.timeline-emoji {
+  font-size: 24px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.timeline-logo {
+  border: 2px solid rgba(25, 118, 210, 0.3);
+}
+
+.timeline-node-branch {
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(25, 118, 210, 0.4),
+    transparent
+  );
+}
+
+/* Dark theme adjustments */
+.v-theme--dark .timeline-line {
+  background: linear-gradient(
+    to bottom,
+    rgba(100, 181, 246, 0.3) 0%,
+    rgba(100, 181, 246, 0.6) 50%,
+    rgba(100, 181, 246, 0.3) 100%
+  );
+}
+
+.v-theme--dark .timeline-node-connector,
+.v-theme--dark .timeline-node-branch {
+  background: linear-gradient(
+    to right,
+    rgba(100, 181, 246, 0.6),
+    rgba(100, 181, 246, 0.3)
+  );
+}
+
+.v-theme--dark .timeline-node-icon {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.15), rgba(100, 181, 246, 0.25));
+  border-color: rgba(100, 181, 246, 0.5);
+  box-shadow: 0 4px 12px rgba(100, 181, 246, 0.2);
+}
+
+.v-theme--dark .timeline-node-icon:hover {
+  border-color: rgba(100, 181, 246, 0.8);
+  box-shadow: 0 6px 20px rgba(100, 181, 246, 0.4);
+}
+
+/* Search highlight styles */
+.search-highlight {
+  background-color: rgba(255, 235, 59, 0.4);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.v-theme--dark .search-highlight {
+  background-color: rgba(255, 235, 59, 0.3);
+  color: rgba(255, 235, 59, 0.9);
+}
+
+.search-results-count {
+  min-width: 80px;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for timeline */
+@media (max-width: 1279px) {
+  .experience-timeline-container {
+    padding-left: 80px;
+  }
+  
+  .timeline-line {
+    left: 40px;
+  }
+  
+  .timeline-row-year-text {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .timeline-row-branch {
+    left: -80px;
+    width: 40px;
+  }
+  
+  .timeline-node {
+    left: -60px;
+  }
+  
+  .timeline-node-icon {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .timeline-emoji {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 959px) {
+  .experience-timeline-container {
+    padding-left: 70px;
+  }
+  
+  .timeline-line {
+    left: 35px;
+  }
+  
+  .timeline-row-year-text {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+  
+  .timeline-row-branch {
+    left: -70px;
+    width: 35px;
+  }
+  
+  .timeline-node {
+    left: -55px;
+  }
+  
+  .timeline-node-icon {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .timeline-emoji {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 599px) {
+  .experience-timeline-container {
+    padding-left: 0;
+  }
+  
+  .timeline-line,
+  .timeline-node,
+  .timeline-row-branch {
+    display: none;
+  }
 }
 
 .experience-row {
@@ -924,6 +1327,7 @@ pre.code-block {
   z-index: 1;
   /* Add margin to prevent overlap */
   margin: 0 8px;
+  margin-left: 0;
 }
 
 /* Netflix-style hover magnify effect with backlight */
@@ -960,6 +1364,130 @@ pre.code-block {
   margin: 2px;
   /* Touch-friendly */
   min-height: 28px;
+}
+
+/* Education & Certifications Styles */
+.education-certifications-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.education-section,
+.certifications-section {
+  margin-bottom: 48px;
+}
+
+.education-section:last-child,
+.certifications-section:last-child {
+  margin-bottom: 0;
+}
+
+.education-cards-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.education-card {
+  flex: 0 1 400px;
+  min-width: 300px;
+  max-width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+}
+
+.education-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.education-logo-wrapper {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(25, 118, 210, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.education-emoji {
+  font-size: 48px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.education-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+.education-logo-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.certification-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+}
+
+.certification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (min-width: 960px) {
+  .education-cards-container {
+    flex-wrap: nowrap;
+  }
+  
+  .education-card {
+    flex: 0 1 450px;
+  }
+}
+
+@media (max-width: 959px) {
+  .education-card {
+    flex: 0 1 100%;
+    max-width: 500px;
+  }
+  
+  .certification-card {
+    min-width: 100% !important;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 599px) {
+  .education-card {
+    flex: 0 1 100%;
+    min-width: 100%;
+  }
+  
+  .education-card .v-card-text {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .education-logo-wrapper {
+    margin-right: 0 !important;
+    margin-bottom: 16px;
+  }
 }
 
 /* Extra Small Devices (Phones, < 480px) */
@@ -1115,22 +1643,97 @@ pre.code-block {
   }
 }
 
-/* Header Responsive Styles */
-.header-responsive {
+/* Netflix-Style Header */
+.netflix-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  );
+  transition: background 0.3s ease;
+  padding: 16px 24px;
   /* iOS safe area support */
   padding-top: max(16px, env(safe-area-inset-top));
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
 }
 
-.header-name {
-  font-size: clamp(1.1rem, 4vw, 1.5rem);
-  text-align: center;
+.netflix-header.scrolled {
+  background: rgba(0, 0, 0, 0.9);
 }
 
-@media (min-width: 960px) {
-  .header-name {
-    text-align: left;
+.v-theme--light .netflix-header {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    transparent 100%
+  );
+}
+
+.v-theme--light .netflix-header.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.netflix-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 100%;
+}
+
+.netflix-logo {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.netflix-logo:hover {
+  transform: scale(1.05);
+}
+
+.netflix-logo-text {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  user-select: none;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(100, 181, 246, 1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.v-theme--light .netflix-logo-text {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(66, 165, 245, 1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.main-content-wrapper {
+  margin-top: 80px;
+  /* Adjust based on header height */
+}
+
+@media (max-width: 959px) {
+  .netflix-header {
+    padding: 12px 16px;
+  }
+  
+  .main-content-wrapper {
+    margin-top: 70px;
+  }
+  
+  .netflix-logo-text {
+    font-size: clamp(1rem, 4vw, 1.5rem);
   }
 }
 
@@ -1158,6 +1761,80 @@ pre.code-block {
 @media (min-width: 600px) and (max-width: 959px) {
   .format-btn {
     font-size: 0.7rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .header-controls,
+  .format-btn,
+  .action-btn,
+  .v-text-field,
+  .v-snackbar {
+    display: none !important;
+  }
+  
+  .header-responsive {
+    padding: 16px !important;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 16px;
+  }
+  
+  .card-view-container {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  
+  .hero-section {
+    padding: 24px !important;
+    margin-bottom: 24px;
+    page-break-inside: avoid;
+  }
+  
+  .section-container {
+    padding: 16px !important;
+    page-break-inside: avoid;
+  }
+  
+  .experience-scroll {
+    overflow: visible !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+  
+  .experience-card {
+    page-break-inside: avoid;
+    margin-bottom: 16px;
+    width: 100% !important;
+    min-width: auto !important;
+    display: block !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  .experience-row {
+    margin-bottom: 24px;
+  }
+  
+  .project-card {
+    page-break-inside: avoid;
+    margin-bottom: 16px;
+  }
+  
+  .v-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Hide scrollbars in print */
+  * {
+    overflow: visible !important;
   }
 }
 </style>
