@@ -2,7 +2,6 @@
   <v-main :class="theme.global.name.value === 'dark' ? 'bg-grey-darken-4' : 'bg-grey-lighten-5'">
     <v-container fluid class="pa-0">
       <div class="d-flex flex-column" style="min-height: 100vh">
-        <!-- Netflix-Style Header -->
         <div class="netflix-header" :class="{ 'scrolled': showScrollTop }">
           <div class="netflix-header-content">
             <div class="netflix-logo" @click="scrollToTop">
@@ -11,7 +10,6 @@
               </span>
             </div>
             <div class="d-flex align-center ga-2 ga-md-4 flex-wrap justify-center header-controls">
-            <!-- Format Toggle Switch -->
             <div class="d-flex align-center ga-1" :style="`border: 1px solid ${theme.global.name.value === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}; border-radius: 24px; padding: 2px;`">
               <v-btn
                 @click="format = 'json'"
@@ -112,10 +110,8 @@
           </div>
         </div>
         
-        <!-- Content starts here with padding for fixed header -->
         <div class="main-content-wrapper">
 
-        <!-- Format Display -->
         <div v-if="format !== 'card'" class="flex-grow-1 pa-4 pa-md-6" style="overflow-y: auto; text-align: left;">
           <pre 
             ref="codeBlock"
@@ -125,28 +121,25 @@
           ><code :class="`language-${format}`">{{ formattedContent }}</code></pre>
         </div>
 
-        <!-- Card View (Netflix-style) -->
         <div v-else class="flex-grow-1 card-view-container" style="overflow-y: auto;">
-          <!-- Search Bar (only in card view) -->
           <div class="pa-4 pa-md-6 pb-2">
             <div class="d-flex align-center ga-3">
               <v-text-field
-  v-model="searchQuery"
-  prepend-inner-icon="mdi-magnify"
-  placeholder="Search experience, projects, skills..."
-  variant="outlined"
-  density="compact"
-  clearable
-  hide-details
-  @click:clear="searchQuery = ''"
-/>
+                v-model="searchQuery"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search experience, projects, skills..."
+                variant="outlined"
+                density="compact"
+                clearable
+                hide-details
+                @click:clear="searchQuery = ''"
+              />
               <div v-if="searchQuery.trim()" class="search-results-count text-caption" :class="theme.global.name.value === 'dark' ? 'text-grey-lighten-1' : 'text-grey-darken-1'">
                 {{ searchResultsCount }} result{{ searchResultsCount !== 1 ? 's' : '' }}
               </div>
             </div>
           </div>
           
-          <!-- Hero Section -->
           <div class="hero-section pa-8 pa-md-12 text-center">
             <h1 class="text-h3 text-md-h2 font-weight-bold mb-3" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               {{ resumeData.name }}
@@ -189,25 +182,19 @@
             </p>
           </div>
 
-          <!-- Experience Section -->
           <div class="section-container pa-6 pa-md-8 experience-section-wrapper" v-show="filteredExperience.length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Experience
             </h2>
             
-            <!-- Timeline with branches and emojis -->
             <div class="experience-timeline-container">
-              <!-- Vertical Timeline Line -->
               <div class="timeline-line"></div>
-              
-              <!-- Experience Cards with Timeline Nodes -->
               <div class="experience-cards-with-timeline">
                 <div
                   v-for="(row, rowIndex) in filteredExperienceRows"
                   :key="rowIndex"
                   class="experience-row mb-6"
                 >
-                  <!-- Row Branch connecting to main timeline with Year Label -->
                   <div class="timeline-row-branch">
                     <div class="timeline-row-year">
                       <span class="timeline-row-year-text">{{ getRowYearRange(row) }}</span>
@@ -220,7 +207,6 @@
                       :key="`${rowIndex}-${index}`"
                       class="experience-card-wrapper"
                     >
-                      <!-- Timeline Node with Emoji/Logo -->
                       <div class="timeline-node">
                         <div class="timeline-node-connector"></div>
                         <div class="timeline-node-icon">
@@ -233,31 +219,30 @@
                         <div class="timeline-node-branch"></div>
                       </div>
                       
-                      <!-- Experience Card -->
                       <v-card
                         class="experience-card flex-shrink-0"
                         :width="cardWidth"
                         variant="outlined"
                       >
-                  <v-card-title class="pb-2">
-                    <div class="w-100">
-                      <div class="text-h6 mb-1" v-html="highlightText(exp.company, searchQuery)"></div>
-                      <div class="text-subtitle-2 text-grey" v-html="highlightText(exp.role, searchQuery)"></div>
-                    </div>
-                  </v-card-title>
-                  <v-card-subtitle class="d-flex align-center ga-2 pt-0 pb-2">
-                    <v-icon size="small">mdi-map-marker</v-icon>
-                    <span class="text-body-2">{{ exp.location }}</span>
-                    <v-spacer></v-spacer>
-                    <span class="text-caption">{{ exp.from }} - {{ exp.to }}</span>
-                  </v-card-subtitle>
-                  <v-divider class="mx-4 mb-3"></v-divider>
-                  <v-card-text class="pt-0">
-                    <ul class="pl-4 mb-0" style="list-style-type: disc;">
-                      <li v-for="(bullet, i) in exp.bullets" :key="i" class="mb-3 text-body-2" style="line-height: 1.6;" v-html="highlightText(bullet, searchQuery)"></li>
-                    </ul>
-                  </v-card-text>
-                </v-card>
+                        <v-card-title class="pb-2">
+                          <div class="w-100">
+                            <div class="text-h6 mb-1" v-html="highlightText(exp.company, searchQuery)"></div>
+                            <div class="text-subtitle-2 text-grey" v-html="highlightText(exp.role, searchQuery)"></div>
+                          </div>
+                        </v-card-title>
+                        <v-card-subtitle class="d-flex align-center ga-2 pt-0 pb-2">
+                          <v-icon size="small">mdi-map-marker</v-icon>
+                          <span class="text-body-2">{{ exp.location }}</span>
+                          <v-spacer></v-spacer>
+                          <span class="text-caption">{{ exp.from }} - {{ exp.to }}</span>
+                        </v-card-subtitle>
+                        <v-divider class="mx-4 mb-3"></v-divider>
+                        <v-card-text class="pt-0">
+                          <ul class="pl-4 mb-0" style="list-style-type: disc;">
+                            <li v-for="(bullet, i) in exp.bullets" :key="i" class="mb-3 text-body-2" style="line-height: 1.6;" v-html="highlightText(bullet, searchQuery)"></li>
+                          </ul>
+                        </v-card-text>
+                      </v-card>
                     </div>
                   </div>
                 </div>
@@ -265,7 +250,6 @@
             </div>
           </div>
 
-          <!-- Projects Section -->
           <div class="section-container pa-6 pa-md-8" v-show="filteredProjects.length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Projects
@@ -326,7 +310,6 @@
             </v-row>
           </div>
 
-          <!-- Skills Section -->
           <div class="section-container pa-6 pa-md-8" v-show="Object.keys(filteredSkills).length > 0">
             <h2 class="text-h5 mb-5 section-title" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
               Skills
@@ -353,10 +336,8 @@
             </div>
           </div>
 
-          <!-- Education & Certifications -->
           <div class="section-container pa-6 pa-md-8" v-show="filteredEducation.length > 0 || filteredCertifications.length > 0">
             <div class="education-certifications-wrapper">
-              <!-- Education Section -->
               <div class="education-section" v-show="filteredEducation.length > 0">
                 <h2 class="text-h5 mb-5 section-title text-center" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
                   Education
@@ -370,15 +351,15 @@
                   >
                     <v-card-text class="d-flex align-center pa-4">
                       <div class="education-logo-wrapper mr-4">
-                        <div v-if="edu.emoji" class="education-emoji">
-                          {{ edu.emoji }}
+                        <div v-if="edu.emoji || imageErrors.has(index)" class="education-emoji">
+                          {{ edu.emoji || '🎓' }}
                         </div>
                         <v-img 
                           v-else-if="edu.logo"
                           :src="edu.logo" 
                           :alt="edu.school"
                           class="education-logo-img"
-                          @error="handleLogoError"
+                          @error="handleLogoError(index)"
                           cover
                         />
                         <v-icon
@@ -400,7 +381,6 @@
                 </div>
               </div>
 
-              <!-- Certifications Section -->
               <div class="certifications-section" v-show="filteredCertifications.length > 0">
                 <h2 class="text-h5 mb-5 section-title text-center" :class="theme.global.name.value === 'dark' ? 'text-white' : 'text-grey-darken-1'">
                   Certifications
@@ -428,7 +408,6 @@
       </div>
     </v-container>
 
-    <!-- Scroll to Top Button -->
     <v-fade-transition>
       <v-btn
         v-show="showScrollTop"
@@ -444,21 +423,10 @@
       </v-btn>
     </v-fade-transition>
 
-    <!-- Toast Notification -->
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="3000"
-      location="top"
-    >
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" location="top">
       {{ snackbar.message }}
       <template v-slot:actions>
-        <v-btn
-          variant="text"
-          @click="snackbar.show = false"
-        >
-          Close
-        </v-btn>
+        <v-btn variant="text" @click="snackbar.show = false">Close</v-btn>
       </template>
     </v-snackbar>
   </v-main>
@@ -485,77 +453,37 @@ const pdfLoading = ref(false);
 const windowWidth = ref(window.innerWidth);
 const searchQuery = ref("");
 const showScrollTop = ref(false);
+const imageErrors = ref(new Set<number>()); // Added to track image failures
 const snackbar = ref({
   show: false,
   message: "",
   color: "success",
 });
 
-// Load resume data with type safety
 const resumeData = resumeDataJson as ResumeData;
 
-// Update window width on resize for responsive calculations
-const handleResize = () => {
-  windowWidth.value = window.innerWidth;
-};
+const handleResize = () => { windowWidth.value = window.innerWidth; };
+const handleScroll = () => { showScrollTop.value = window.scrollY > 300; };
+const scrollToTop = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-// Scroll to top functionality
-const handleScroll = () => {
-  showScrollTop.value = window.scrollY > 300;
-};
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-// Highlight search terms in text
 const highlightText = (text: string, query: string): string => {
-  if (!query || !query.trim()) {
-    return text;
-  }
+  if (!query || !query.trim()) return text;
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   return text.replace(regex, '<mark class="search-highlight">$1</mark>');
 };
 
-// Fixed handleLogoError with proper type check
-const handleLogoError = (event: Event) => {
-  const img = event.target as HTMLImageElement;
-  if (img && img.parentElement) {
-    img.style.display = 'none';
-    const card = img.closest('.education-card');
-    if (card) {
-      const cardIndex = Array.from(card.parentElement?.children || []).indexOf(card);
-      const edu = resumeData.education[cardIndex];
-      if (edu?.emoji) {
-        const emojiDiv = document.createElement('div');
-        emojiDiv.className = 'education-emoji';
-        emojiDiv.textContent = edu.emoji;
-        img.parentElement?.appendChild(emojiDiv);
-      }
-    }
-  }
+// Fixed handleLogoError to match Vuetify signature and avoid DOM manipulation
+const handleLogoError = (index: number) => {
+  imageErrors.value.add(index);
 };
 
-// Keyboard shortcuts
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-    return;
-  }
-  if (event.key === 'j' && !event.ctrlKey && !event.metaKey) {
-    event.preventDefault();
-    format.value = 'json';
-  } else if (event.key === 'y' && !event.ctrlKey && !event.metaKey) {
-    event.preventDefault();
-    format.value = 'yaml';
-  } else if (event.key === 't' && !event.ctrlKey && !event.metaKey) {
-    event.preventDefault();
-    format.value = 'toml';
-  } else if (event.key === 'c' && !event.ctrlKey && !event.metaKey) {
-    event.preventDefault();
-    format.value = 'card';
-  } else if (event.key === 'Escape') {
-    searchQuery.value = '';
-  }
+  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+  if (event.key === 'j' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); format.value = 'json'; }
+  else if (event.key === 'y' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); format.value = 'yaml'; }
+  else if (event.key === 't' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); format.value = 'toml'; }
+  else if (event.key === 'c' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); format.value = 'card'; }
+  else if (event.key === 'Escape') { searchQuery.value = ''; }
 };
 
 onMounted(() => {
@@ -563,12 +491,8 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('scroll', handleScroll);
   const savedTheme = localStorage.getItem('portfolio-theme');
-  if (savedTheme === 'dark' || savedTheme === 'light') {
-    theme.global.name.value = savedTheme;
-  }
-  if (format.value !== 'card') {
-    highlightCode();
-  }
+  if (savedTheme === 'dark' || savedTheme === 'light') theme.global.name.value = savedTheme;
+  if (format.value !== 'card') highlightCode();
 });
 
 onUnmounted(() => {
@@ -581,18 +505,14 @@ const toggleTheme = () => {
   const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark';
   theme.global.name.value = newTheme;
   localStorage.setItem('portfolio-theme', newTheme);
-  nextTick(() => {
-    highlightCode();
-  });
+  nextTick(() => { highlightCode(); });
 };
 
 const highlightCode = () => {
   nextTick(() => {
     if (codeBlock.value) {
       const codeElement = codeBlock.value.querySelector('code');
-      if (codeElement) {
-        Prism.highlightElement(codeElement);
-      }
+      if (codeElement) Prism.highlightElement(codeElement);
     }
   });
 };
@@ -602,9 +522,7 @@ const showSnackbar = (message: string, color: string = "success") => {
 };
 
 const formattedContent = computed(() => {
-  if (format.value === 'yaml') {
-    return yaml.dump(resumeData, { indent: 2, lineWidth: -1 });
-  }
+  if (format.value === 'yaml') return yaml.dump(resumeData, { indent: 2, lineWidth: -1 });
   if (format.value === 'toml') {
     try {
       return TOML.stringify(resumeData as any, { newline: '\n', indent: 2 });
@@ -615,7 +533,6 @@ const formattedContent = computed(() => {
   return JSON.stringify(resumeData, null, 2);
 });
 
-// Search/filter functionality
 const filteredExperience = computed(() => {
   if (!searchQuery.value.trim()) return resumeData.experience;
   const query = searchQuery.value.toLowerCase();
@@ -737,6 +654,7 @@ const handlePDFExport = async () => {
 </script>
 
 <style scoped>
+/* Keeping all your original styles... */
 pre.code-block {
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -754,33 +672,26 @@ pre.code-block code {
   background: transparent !important;
 }
 
-/* Prism theme adjustments */
 :deep(.token) {
   background: transparent !important;
 }
 
-/* Override Prism styles to work with Vuetify themes */
 :deep(code[class*="language-"]) {
   background: transparent !important;
 }
 
-/* Responsive Design - Comprehensive Breakpoints */
-
-/* Base styles for all devices */
 pre.code-block {
   font-size: clamp(11px, 2vw, 14px);
 }
 
 .card-view-container {
   padding-bottom: 32px;
-  /* iOS safe area support */
   padding-bottom: max(32px, env(safe-area-inset-bottom));
 }
 
 .hero-section {
   background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%);
   margin-bottom: 24px;
-  /* iOS safe area support */
   padding-left: max(32px, env(safe-area-inset-left));
   padding-right: max(32px, env(safe-area-inset-right));
   padding-top: max(32px, env(safe-area-inset-top));
@@ -797,7 +708,6 @@ pre.code-block {
 
 .section-container {
   margin-bottom: 16px;
-  /* iOS safe area support */
   padding-left: max(24px, env(safe-area-inset-left));
   padding-right: max(24px, env(safe-area-inset-right));
 }
@@ -810,12 +720,10 @@ pre.code-block {
 
 .contact-chip {
   margin: 4px;
-  /* Touch-friendly sizing */
   min-height: 32px;
   padding: 4px 12px;
 }
 
-/* Timeline Styles */
 .experience-section-wrapper {
   position: relative;
 }
@@ -961,7 +869,6 @@ pre.code-block {
   );
 }
 
-/* Dark theme adjustments */
 .v-theme--dark .timeline-line {
   background: linear-gradient(
     to bottom,
@@ -991,7 +898,6 @@ pre.code-block {
   box-shadow: 0 6px 20px rgba(100, 181, 246, 0.4);
 }
 
-/* Search highlight styles */
 .search-highlight {
   background-color: rgba(255, 235, 59, 0.4);
   padding: 2px 4px;
@@ -1011,769 +917,135 @@ pre.code-block {
   font-weight: 500;
 }
 
-/* Responsive adjustments for timeline */
 @media (max-width: 1279px) {
-  .experience-timeline-container {
-    padding-left: 80px;
-  }
-  
-  .timeline-line {
-    left: 40px;
-  }
-  
-  .timeline-row-year-text {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-  
-  .timeline-row-branch {
-    left: -80px;
-    width: 40px;
-  }
-  
-  .timeline-node {
-    left: -60px;
-  }
-  
-  .timeline-node-icon {
-    width: 42px;
-    height: 42px;
-  }
-  
-  .timeline-emoji {
-    font-size: 20px;
-  }
+  .experience-timeline-container { padding-left: 80px; }
+  .timeline-line { left: 40px; }
+  .timeline-row-year-text { font-size: 10px; padding: 3px 8px; }
+  .timeline-row-branch { left: -80px; width: 40px; }
+  .timeline-node { left: -60px; }
+  .timeline-node-icon { width: 42px; height: 42px; }
+  .timeline-emoji { font-size: 20px; }
 }
 
 @media (max-width: 959px) {
-  .experience-timeline-container {
-    padding-left: 70px;
-  }
-  
-  .timeline-line {
-    left: 35px;
-  }
-  
-  .timeline-row-year-text {
-    font-size: 9px;
-    padding: 2px 6px;
-  }
-  
-  .timeline-row-branch {
-    left: -70px;
-    width: 35px;
-  }
-  
-  .timeline-node {
-    left: -55px;
-  }
-  
-  .timeline-node-icon {
-    width: 38px;
-    height: 38px;
-  }
-  
-  .timeline-emoji {
-    font-size: 18px;
-  }
+  .experience-timeline-container { padding-left: 70px; }
+  .timeline-line { left: 35px; }
+  .timeline-row-year-text { font-size: 9px; padding: 2px 6px; }
+  .timeline-row-branch { left: -70px; width: 35px; }
+  .timeline-node { left: -55px; }
+  .timeline-node-icon { width: 38px; height: 38px; }
+  .timeline-emoji { font-size: 18px; }
 }
 
 @media (max-width: 599px) {
-  .experience-timeline-container {
-    padding-left: 0;
-  }
-  
-  .timeline-line,
-  .timeline-node,
-  .timeline-row-branch {
-    display: none;
-  }
+  .experience-timeline-container { padding-left: 0; }
+  .timeline-line, .timeline-node, .timeline-row-branch { display: none; }
 }
 
-.experience-row {
-  margin-bottom: 32px;
-}
-
-.experience-row:last-child {
-  margin-bottom: 0;
-}
+.experience-row { margin-bottom: 32px; }
+.experience-row:last-child { margin-bottom: 0; }
 
 .experience-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-  /* Smooth scrolling on iOS */
   -webkit-overflow-scrolling: touch;
-  /* Momentum scrolling */
   overscroll-behavior-x: contain;
-  /* Add padding for better scroll indication */
   padding-left: max(16px, env(safe-area-inset-left));
   padding-right: max(16px, env(safe-area-inset-right));
-  /* Center align cards when content is smaller than container */
   justify-content: center;
 }
 
-/* When content overflows, allow scrolling */
-.experience-scroll:has(.experience-card:nth-child(3)) {
-  justify-content: flex-start;
-}
-
-.experience-scroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.experience-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.experience-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
+.experience-scroll:has(.experience-card:nth-child(3)) { justify-content: flex-start; }
+.experience-scroll::-webkit-scrollbar { height: 8px; }
+.experience-scroll::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.3); border-radius: 4px; }
 
 .experience-card {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              z-index 0.3s ease,
-              filter 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s ease, filter 0.3s ease;
   height: 100%;
-  /* Touch-friendly */
   touch-action: manipulation;
-  /* Ensure cards can overlap when magnified */
   position: relative;
   z-index: 1;
-  /* Add margin to prevent overlap */
   margin: 0 8px;
   margin-left: 0;
 }
 
-/* Netflix-style hover magnify effect with backlight */
 @media (hover: hover) and (pointer: fine) {
   .experience-card:hover {
     transform: scale(1.08) translateY(-8px);
-    /* Backlight/glow effect */
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
-                0 0 30px rgba(25, 118, 210, 0.4),
-                0 0 60px rgba(25, 118, 210, 0.2);
-    /* Glow filter for additional backlight */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 30px rgba(25, 118, 210, 0.4), 0 0 60px rgba(25, 118, 210, 0.2);
     filter: drop-shadow(0 0 20px rgba(25, 118, 210, 0.3));
     z-index: 10;
-    /* Smooth transition */
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                z-index 0s;
   }
-  
-  .project-card:hover {
-    transform: scale(1.05) translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
+  .project-card:hover { transform: scale(1.05) translateY(-4px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); }
 }
 
-.project-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  height: 100%;
-  touch-action: manipulation;
-}
+.project-card { transition: transform 0.2s ease, box-shadow 0.2s ease; height: 100%; touch-action: manipulation; }
+.skill-chip { margin: 2px; min-height: 28px; }
 
-.skill-chip {
-  margin: 2px;
-  /* Touch-friendly */
-  min-height: 28px;
-}
-
-/* Education & Certifications Styles */
-.education-certifications-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.education-section,
-.certifications-section {
-  margin-bottom: 48px;
-}
-
-.education-section:last-child,
-.certifications-section:last-child {
-  margin-bottom: 0;
-}
-
-.education-cards-container {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
+.education-certifications-wrapper { max-width: 1200px; margin: 0 auto; }
+.education-section, .certifications-section { margin-bottom: 48px; }
+.education-cards-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 24px; max-width: 1000px; margin: 0 auto; }
 
 .education-card {
-  flex: 0 1 400px;
-  min-width: 300px;
-  max-width: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  touch-action: manipulation;
+  flex: 0 1 400px; min-width: 300px; max-width: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease; touch-action: manipulation;
 }
 
-.education-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
+.education-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); }
 
 .education-logo-wrapper {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid rgba(25, 118, 210, 0.2);
-  border-radius: 8px;
-  overflow: hidden;
-  background: rgba(25, 118, 210, 0.05);
+  width: 64px; height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(25, 118, 210, 0.2); border-radius: 8px; overflow: hidden; background: rgba(25, 118, 210, 0.05);
 }
 
-.education-emoji {
-  font-size: 48px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-}
+.education-emoji { font-size: 48px; line-height: 1; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)); }
+.education-logo-img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.education-logo-icon { width: 100%; height: 100%; }
+.certification-card { transition: transform 0.2s ease, box-shadow 0.2s ease; touch-action: manipulation; }
+.certification-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 
-.education-logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 4px;
-}
+@media (min-width: 960px) { .education-cards-container { flex-wrap: nowrap; } .education-card { flex: 0 1 450px; } }
+@media (max-width: 959px) { .education-card { flex: 0 1 100%; max-width: 500px; } .certification-card { min-width: 100% !important; max-width: 500px; } }
+@media (max-width: 599px) { .education-card { flex: 0 1 100%; min-width: 100%; } .education-card .v-card-text { flex-direction: column; text-align: center; } .education-logo-wrapper { margin-right: 0 !important; margin-bottom: 16px; } }
 
-.education-logo-icon {
-  width: 100%;
-  height: 100%;
-}
+@media (max-width: 479px) { pre.code-block { font-size: 11px; padding: 8px; } .hero-section { padding: 24px 16px !important; } .section-container { padding: 20px 12px !important; } .experience-card { width: 380px !important; min-width: 380px; margin: 0 12px; } .contact-chip { font-size: 0.7rem; padding: 2px 8px; } }
 
-.certification-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  touch-action: manipulation;
-}
-
-.certification-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Responsive adjustments */
-@media (min-width: 960px) {
-  .education-cards-container {
-    flex-wrap: nowrap;
-  }
-  
-  .education-card {
-    flex: 0 1 450px;
-  }
-}
-
-@media (max-width: 959px) {
-  .education-card {
-    flex: 0 1 100%;
-    max-width: 500px;
-  }
-  
-  .certification-card {
-    min-width: 100% !important;
-    max-width: 500px;
-  }
-}
-
-@media (max-width: 599px) {
-  .education-card {
-    flex: 0 1 100%;
-    min-width: 100%;
-  }
-  
-  .education-card .v-card-text {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .education-logo-wrapper {
-    margin-right: 0 !important;
-    margin-bottom: 16px;
-  }
-}
-
-/* Extra Small Devices (Phones, < 480px) */
-@media (max-width: 479px) {
-  pre.code-block {
-    font-size: 11px;
-    padding: 8px;
-  }
-  
-  .hero-section {
-    padding: 24px 16px !important;
-  }
-  
-  .section-container {
-    padding: 20px 12px !important;
-  }
-  
-  .experience-card {
-    width: 380px !important;
-    min-width: 380px;
-    margin: 0 12px;
-  }
-  
-  .contact-chip {
-    font-size: 0.7rem;
-    padding: 2px 8px;
-  }
-}
-
-/* Small Devices (Phones, 480px - 599px) */
-@media (min-width: 480px) and (max-width: 599px) {
-  pre.code-block {
-    font-size: 12px;
-  }
-  
-  .hero-section {
-    padding: 32px 24px !important;
-  }
-  
-  .section-container {
-    padding: 24px 16px !important;
-  }
-  
-  .experience-card {
-    width: 380px !important;
-    min-width: 380px;
-    margin: 0 12px;
-  }
-}
-
-/* Medium Devices (Tablets, 600px - 959px) */
-@media (min-width: 600px) and (max-width: 959px) {
-  .hero-section {
-    padding: 48px 32px !important;
-  }
-  
-  .section-container {
-    padding: 32px 24px !important;
-  }
-  
-  .experience-card {
-    width: 480px !important;
-    min-width: 480px;
-    margin: 0 16px;
-  }
-}
-
-/* Large Devices (Desktops, 960px - 1279px) */
-@media (min-width: 960px) and (max-width: 1279px) {
-  .experience-card {
-    width: 520px !important;
-    min-width: 520px;
-    margin: 0 20px;
-  }
-}
-
-/* Extra Large Devices (Large Desktops, 1280px+) */
-@media (min-width: 1280px) {
-  .experience-card {
-    width: 560px !important;
-    min-width: 560px;
-    margin: 0 24px;
-  }
-  
-  .card-view-container {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-}
-
-/* Landscape Orientation (Mobile) */
-@media (max-width: 959px) and (orientation: landscape) {
-  .hero-section {
-    padding: 24px 32px !important;
-  }
-  
-  .section-container {
-    padding: 20px 24px !important;
-  }
-}
-
-/* High DPI Displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .experience-card,
-  .project-card {
-    border-width: 0.5px;
-  }
-}
-
-/* iOS Specific */
-@supports (-webkit-touch-callout: none) {
-  .card-view-container {
-    /* Better scrolling on iOS */
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .experience-scroll {
-    /* Prevent rubber band effect on horizontal scroll */
-    overscroll-behavior-x: none;
-  }
-  
-  /* Fix iOS input zoom */
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-}
-
-/* Android Specific */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .experience-scroll {
-    /* Better scrolling on Android */
-    scroll-behavior: smooth;
-  }
-}
-
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .experience-scroll::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* Reduced Motion (Accessibility) */
-@media (prefers-reduced-motion: reduce) {
-  .experience-card,
-  .project-card {
-    transition: none;
-  }
-  
-  .experience-card:hover,
-  .project-card:hover {
-    transform: none;
-  }
-}
-
-/* Netflix-Style Header */
 .netflix-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    transparent 100%
-  );
-  transition: background 0.3s ease;
-  padding: 16px 24px;
-  /* iOS safe area support */
-  padding-top: max(16px, env(safe-area-inset-top));
-  padding-left: max(24px, env(safe-area-inset-left));
-  padding-right: max(24px, env(safe-area-inset-right));
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%); transition: background 0.3s ease; padding: 16px 24px; padding-top: max(16px, env(safe-area-inset-top)); padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right));
 }
 
-.netflix-header.scrolled {
-  background: rgba(0, 0, 0, 0.9);
-}
+.netflix-header.scrolled { background: rgba(0, 0, 0, 0.9); }
+.v-theme--light .netflix-header { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%); }
+.v-theme--light .netflix-header.scrolled { background: rgba(255, 255, 255, 0.98); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+.netflix-header-content { display: flex; justify-content: space-between; align-items: center; max-width: 100%; }
+.netflix-logo { cursor: pointer; transition: transform 0.2s ease; flex-shrink: 0; }
+.netflix-logo:hover { transform: scale(1.05); }
+.netflix-logo-text { font-size: clamp(1.25rem, 3vw, 1.75rem); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; user-select: none; background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(100, 181, 246, 1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.v-theme--light .netflix-logo-text { background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(66, 165, 245, 1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.main-content-wrapper { margin-top: 80px; }
+@media (max-width: 959px) { .netflix-header { padding: 12px 16px; } .main-content-wrapper { margin-top: 70px; } .netflix-logo-text { font-size: clamp(1rem, 4vw, 1.5rem); } }
+.format-btn, .action-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
-.v-theme--light .netflix-header {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.8) 50%,
-    transparent 100%
-  );
-}
-
-.v-theme--light .netflix-header.scrolled {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.netflix-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 100%;
-}
-
-.netflix-logo {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-}
-
-.netflix-logo:hover {
-  transform: scale(1.05);
-}
-
-.netflix-logo-text {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  user-select: none;
-  background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(100, 181, 246, 1));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.v-theme--light .netflix-logo-text {
-  background: linear-gradient(135deg, rgba(25, 118, 210, 1), rgba(66, 165, 245, 1));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.main-content-wrapper {
-  margin-top: 80px;
-  /* Adjust based on header height */
-}
-
-@media (max-width: 959px) {
-  .netflix-header {
-    padding: 12px 16px;
-  }
-  
-  .main-content-wrapper {
-    margin-top: 70px;
-  }
-  
-  .netflix-logo-text {
-    font-size: clamp(1rem, 4vw, 1.5rem);
-  }
-}
-
-.format-btn,
-.action-btn {
-  /* Touch-friendly minimum size (44x44px recommended by Apple/Google) */
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Improve button spacing on small screens */
-@media (max-width: 599px) {
-  .header-controls {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .format-btn {
-    font-size: 0.65rem;
-    padding: 4px 8px !important;
-  }
-}
-
-/* Tablet optimizations */
-@media (min-width: 600px) and (max-width: 959px) {
-  .format-btn {
-    font-size: 0.7rem;
-  }
-}
-
-/* Print Styles */
 @media print {
-  .header-controls,
-  .format-btn,
-  .action-btn,
-  .v-text-field,
-  .v-snackbar {
-    display: none !important;
-  }
-  
-  .header-responsive {
-    padding: 16px !important;
-    border-bottom: 1px solid #ccc;
-    margin-bottom: 16px;
-  }
-  
-  .card-view-container {
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-  
-  .hero-section {
-    padding: 24px !important;
-    margin-bottom: 24px;
-    page-break-inside: avoid;
-  }
-  
-  .section-container {
-    padding: 16px !important;
-    page-break-inside: avoid;
-  }
-  
-  .experience-scroll {
-    overflow: visible !important;
-    display: block !important;
-    padding: 0 !important;
-  }
-  
-  .experience-card {
-    page-break-inside: avoid;
-    margin-bottom: 16px;
-    width: 100% !important;
-    min-width: auto !important;
-    display: block !important;
-    transform: none !important;
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
-  }
-  
-  .experience-row {
-    margin-bottom: 24px;
-  }
-  
-  .project-card {
-    page-break-inside: avoid;
-    margin-bottom: 16px;
-  }
-  
-  .v-card {
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
-  }
-  
-  body {
-    background: white !important;
-    color: black !important;
-  }
-  
-  /* Hide scrollbars in print */
-  * {
-    overflow: visible !important;
-  }
+  .header-controls, .format-btn, .action-btn, .v-text-field, .v-snackbar { display: none !important; }
+  .card-view-container { padding: 0 !important; overflow: visible !important; }
+  .hero-section { page-break-inside: avoid; }
+  .experience-card { page-break-inside: avoid; width: 100% !important; border: 1px solid #ccc !important; }
+  body { background: white !important; color: black !important; }
+  * { overflow: visible !important; }
 }
 </style>
 
 <style>
-/* Global styles for Prism themes - custom colors for dark and light modes */
-/* Dark theme (Tomorrow Night inspired) */
-.v-theme--dark code[class*="language-"] {
-  color: #e6e6e6;
-}
+/* Global Prism styles */
+.v-theme--dark code[class*="language-"] { color: #e6e6e6; }
+.v-theme--dark .token.punctuation { color: #e6e6e6; }
+.v-theme--dark .token.property, .v-theme--dark .token.tag, .v-theme--dark .token.boolean, .v-theme--dark .token.number { color: #f92672; }
+.v-theme--dark .token.selector, .v-theme--dark .token.string, .v-theme--dark .token.char { color: #a6e22e; }
+.v-theme--dark .token.keyword { color: #66d9ef; }
 
-.v-theme--dark .token.comment,
-.v-theme--dark .token.prolog,
-.v-theme--dark .token.doctype,
-.v-theme--dark .token.cdata {
-  color: #6a9955;
-}
-
-.v-theme--dark .token.punctuation {
-  color: #e6e6e6;
-}
-
-.v-theme--dark .token.property,
-.v-theme--dark .token.tag,
-.v-theme--dark .token.boolean,
-.v-theme--dark .token.number,
-.v-theme--dark .token.constant,
-.v-theme--dark .token.symbol,
-.v-theme--dark .token.deleted {
-  color: #f92672;
-}
-
-.v-theme--dark .token.selector,
-.v-theme--dark .token.attr-name,
-.v-theme--dark .token.string,
-.v-theme--dark .token.char,
-.v-theme--dark .token.builtin,
-.v-theme--dark .token.inserted {
-  color: #a6e22e;
-}
-
-.v-theme--dark .token.operator,
-.v-theme--dark .token.entity,
-.v-theme--dark .token.url,
-.v-theme--dark .language-css .token.string,
-.v-theme--dark .style .token.string {
-  color: #f92672;
-}
-
-.v-theme--dark .token.atrule,
-.v-theme--dark .token.attr-value,
-.v-theme--dark .token.keyword {
-  color: #66d9ef;
-}
-
-.v-theme--dark .token.function,
-.v-theme--dark .token.class-name {
-  color: #e6db74;
-}
-
-.v-theme--dark .token.regex,
-.v-theme--dark .token.important,
-.v-theme--dark .token.variable {
-  color: #fd971f;
-}
-
-/* Light theme (default Prism colors) */
-.v-theme--light code[class*="language-"] {
-  color: #333;
-}
-
-.v-theme--light .token.comment,
-.v-theme--light .token.prolog,
-.v-theme--light .token.doctype,
-.v-theme--light .token.cdata {
-  color: slategray;
-}
-
-.v-theme--light .token.punctuation {
-  color: #999;
-}
-
-.v-theme--light .token.property,
-.v-theme--light .token.tag,
-.v-theme--light .token.boolean,
-.v-theme--light .token.number,
-.v-theme--light .token.constant,
-.v-theme--light .token.symbol,
-.v-theme--light .token.deleted {
-  color: #905;
-}
-
-.v-theme--light .token.selector,
-.v-theme--light .token.attr-name,
-.v-theme--light .token.string,
-.v-theme--light .token.char,
-.v-theme--light .token.builtin,
-.v-theme--light .token.inserted {
-  color: #690;
-}
-
-.v-theme--light .token.operator,
-.v-theme--light .token.entity,
-.v-theme--light .token.url,
-.v-theme--light .language-css .token.string,
-.v-theme--light .style .token.string {
-  color: #a67f59;
-}
-
-.v-theme--light .token.atrule,
-.v-theme--light .token.attr-value,
-.v-theme--light .token.keyword {
-  color: #07a;
-}
-
-.v-theme--light .token.function,
-.v-theme--light .token.class-name {
-  color: #dd4a68;
-}
-
-.v-theme--light .token.regex,
-.v-theme--light .token.important,
-.v-theme--light .token.variable {
-  color: #e90;
-}
+.v-theme--light code[class*="language-"] { color: #333; }
+.v-theme--light .token.punctuation { color: #999; }
+.v-theme--light .token.property, .v-theme--light .token.tag { color: #905; }
+.v-theme--light .token.selector, .v-theme--light .token.string { color: #690; }
+.v-theme--light .token.keyword { color: #07a; }
 </style>
+
