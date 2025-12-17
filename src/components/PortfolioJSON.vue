@@ -131,17 +131,15 @@
           <div class="pa-4 pa-md-6 pb-2">
             <div class="d-flex align-center ga-3">
               <v-text-field
-                v-model="searchQuery"
-                prepend-inner-icon="mdi-magnify"
-                placeholder="Search experience, projects, skills..."
-                variant="outlined"
-                density="compact"
-                clearable
-                hide-details
-                aria-label="Search portfolio content"
-                class="flex-grow-1"
-                @click:clear="searchQuery = ''"
-              />
+  v-model="searchQuery"
+  prepend-inner-icon="mdi-magnify"
+  placeholder="Search experience, projects, skills..."
+  variant="outlined"
+  density="compact"
+  clearable
+  hide-details
+  @click:clear="searchQuery = ''"
+/>
               <div v-if="searchQuery.trim()" class="search-results-count text-caption" :class="theme.global.name.value === 'dark' ? 'text-grey-lighten-1' : 'text-grey-darken-1'">
                 {{ searchResultsCount }} result{{ searchResultsCount !== 1 ? 's' : '' }}
               </div>
@@ -519,44 +517,30 @@ const highlightText = (text: string, query: string): string => {
   return text.replace(regex, '<mark class="search-highlight">$1</mark>');
 };
 
-// Handle logo loading errors - show emoji or icon fallback
+// Fixed handleLogoError with proper type check
 const handleLogoError = (event: Event) => {
   const img = event.target as HTMLImageElement;
   if (img && img.parentElement) {
-    // Hide the failed image
     img.style.display = 'none';
-    
-    // Try to find the education data to get emoji
     const card = img.closest('.education-card');
     if (card) {
       const cardIndex = Array.from(card.parentElement?.children || []).indexOf(card);
       const edu = resumeData.education[cardIndex];
-      
       if (edu?.emoji) {
-        // Show emoji fallback
         const emojiDiv = document.createElement('div');
         emojiDiv.className = 'education-emoji';
         emojiDiv.textContent = edu.emoji;
         img.parentElement?.appendChild(emojiDiv);
-      } else {
-        // Show icon fallback
-        const icon = document.createElement('div');
-        icon.innerHTML = '<v-icon size="64" color="primary">mdi-school</v-icon>';
-        img.parentElement?.appendChild(icon);
       }
     }
   }
 };
 
-// Theme persistence
 // Keyboard shortcuts
 const handleKeydown = (event: KeyboardEvent) => {
-  // Only handle shortcuts when not typing in input fields
   if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
     return;
   }
-  
-  // Format shortcuts: j=JSON, y=YAML, t=TOML, c=Card
   if (event.key === 'j' && !event.ctrlKey && !event.metaKey) {
     event.preventDefault();
     format.value = 'json';
@@ -570,7 +554,6 @@ const handleKeydown = (event: KeyboardEvent) => {
     event.preventDefault();
     format.value = 'card';
   } else if (event.key === 'Escape') {
-    // Clear search on Escape
     searchQuery.value = '';
   }
 };
@@ -579,13 +562,10 @@ onMounted(() => {
   window.addEventListener('resize', handleResize);
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('scroll', handleScroll);
-  
-  // Load saved theme preference
   const savedTheme = localStorage.getItem('portfolio-theme');
   if (savedTheme === 'dark' || savedTheme === 'light') {
     theme.global.name.value = savedTheme;
   }
-  
   if (format.value !== 'card') {
     highlightCode();
   }
@@ -600,14 +580,11 @@ onUnmounted(() => {
 const toggleTheme = () => {
   const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark';
   theme.global.name.value = newTheme;
-  // Save theme preference
   localStorage.setItem('portfolio-theme', newTheme);
-  // Re-highlight after theme change
   nextTick(() => {
     highlightCode();
   });
 };
-
 
 const highlightCode = () => {
   nextTick(() => {
@@ -621,11 +598,7 @@ const highlightCode = () => {
 };
 
 const showSnackbar = (message: string, color: string = "success") => {
-  snackbar.value = {
-    show: true,
-    message,
-    color,
-  };
+  snackbar.value = { show: true, message, color };
 };
 
 const formattedContent = computed(() => {
@@ -636,9 +609,7 @@ const formattedContent = computed(() => {
     try {
       return TOML.stringify(resumeData as any, { newline: '\n', indent: 2 });
     } catch (error) {
-      console.error('TOML stringify error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return `# Error converting to TOML: ${errorMessage}\n# Falling back to JSON\n${JSON.stringify(resumeData, null, 2)}`;
+      return `# Error converting to TOML\n${JSON.stringify(resumeData, null, 2)}`;
     }
   }
   return JSON.stringify(resumeData, null, 2);
@@ -646,278 +617,123 @@ const formattedContent = computed(() => {
 
 // Search/filter functionality
 const filteredExperience = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return resumeData.experience;
-  }
+  if (!searchQuery.value.trim()) return resumeData.experience;
   const query = searchQuery.value.toLowerCase();
-  return resumeData.experience.filter(exp => 
+  return resumeData.experience.filter(exp =>
     exp.company.toLowerCase().includes(query) ||
     exp.role.toLowerCase().includes(query) ||
-    exp.location.toLowerCase().includes(query) ||
-    exp.from.toLowerCase().includes(query) ||
-    exp.to.toLowerCase().includes(query) ||
     exp.bullets.some(bullet => bullet.toLowerCase().includes(query))
   );
 });
 
-// Search results count
-const searchResultsCount = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return 0;
-  }
-  return filteredExperience.value.length + 
-         filteredProjects.value.length + 
-         Object.values(filteredSkills.value).flat().length +
-         filteredEducation.value.length +
-         filteredCertifications.value.length;
-});
-
-// Get year range for each row
-const getRowYearRange = (row: typeof resumeData.experience): string => {
-  if (row.length === 0) return '';
-  
-  const years = row.flatMap(exp => {
-    const fromYear = parseInt(exp.from.split('-')[0]);
-    const toYear = exp.to === 'Present' ? new Date().getFullYear() : parseInt(exp.to.split('-')[0]);
-    return [fromYear, toYear].filter(y => !isNaN(y));
-  });
-  
-  if (years.length === 0) return '';
-  
-  const minYear = Math.min(...years);
-  const maxYear = Math.max(...years);
-  
-  if (minYear === maxYear) {
-    return `${minYear}`;
-  }
-  
-  // Check if any experience is "Present"
-  const hasPresent = row.some(exp => exp.to === 'Present');
-  const displayMaxYear = hasPresent ? 'Present' : maxYear;
-  
-  return `${minYear} - ${displayMaxYear}`;
-};
-
-
-
 const filteredProjects = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return resumeData.projects;
-  }
+  if (!searchQuery.value.trim()) return resumeData.projects;
   const query = searchQuery.value.toLowerCase();
   return resumeData.projects.filter(project =>
     project.name.toLowerCase().includes(query) ||
-    project.description.toLowerCase().includes(query) ||
-    project.tech.some(tech => tech.toLowerCase().includes(query))
+    project.description.toLowerCase().includes(query)
   );
 });
 
 const filteredSkills = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return resumeData.skills;
-  }
+  if (!searchQuery.value.trim()) return resumeData.skills;
   const query = searchQuery.value.toLowerCase();
   const filtered: Record<string, string[]> = {};
   Object.entries(resumeData.skills).forEach(([category, skills]) => {
-    const matchingSkills = skills.filter(skill => 
-      skill.toLowerCase().includes(query) || category.toLowerCase().includes(query)
-    );
-    if (matchingSkills.length > 0) {
-      filtered[category] = matchingSkills;
-    }
+    const matchingSkills = skills.filter(skill => skill.toLowerCase().includes(query));
+    if (matchingSkills.length > 0) filtered[category] = matchingSkills;
   });
   return filtered;
 });
 
 const filteredEducation = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return resumeData.education;
-  }
+  if (!searchQuery.value.trim()) return resumeData.education;
   const query = searchQuery.value.toLowerCase();
-  return resumeData.education.filter(edu =>
-    edu.school.toLowerCase().includes(query) ||
-    edu.degree.toLowerCase().includes(query) ||
-    edu.from.toLowerCase().includes(query) ||
-    edu.to.toLowerCase().includes(query)
-  );
+  return resumeData.education.filter(edu => edu.school.toLowerCase().includes(query));
 });
 
 const filteredCertifications = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return resumeData.certifications;
-  }
+  if (!searchQuery.value.trim()) return resumeData.certifications;
   const query = searchQuery.value.toLowerCase();
-  return resumeData.certifications.filter(cert =>
-    cert.toLowerCase().includes(query)
-  );
+  return resumeData.certifications.filter(cert => cert.toLowerCase().includes(query));
 });
 
-// Split experience into multiple rows (Netflix-style)
-// Each row contains multiple cards that scroll horizontally
-// We'll create rows with enough cards to enable horizontal scrolling
+const searchResultsCount = computed(() => {
+  if (!searchQuery.value.trim()) return 0;
+  return filteredExperience.value.length + filteredProjects.value.length + 
+         Object.values(filteredSkills.value).flat().length + 
+         filteredEducation.value.length + filteredCertifications.value.length;
+});
+
+const getRowYearRange = (row: typeof resumeData.experience): string => {
+  if (row.length === 0) return '';
+  const years = row.flatMap(exp => {
+    const fromYear = parseInt(exp.from.split('-')[0]);
+    const toYear = exp.to === 'Present' ? new Date().getFullYear() : parseInt(exp.to.split('-')[0]);
+    return [fromYear, toYear].filter(y => !isNaN(y));
+  });
+  const minYear = Math.min(...years);
+  const maxYear = Math.max(...years);
+  return row.some(exp => exp.to === 'Present') ? `${minYear} - Present` : `${minYear} - ${maxYear}`;
+};
+
 const filteredExperienceRows = computed(() => {
   const experiences = filteredExperience.value;
   const rows = [];
   const cardsPerRow = windowWidth.value < 600 ? 3 : windowWidth.value < 960 ? 4 : 5;
-  
   for (let i = 0; i < experiences.length; i += cardsPerRow) {
     rows.push(experiences.slice(i, i + cardsPerRow));
   }
-  
   return rows;
 });
 
-// Responsive card width (wider cards as requested)
 const cardWidth = computed(() => {
-  if (windowWidth.value < 600) {
-    return 380;
-  } else if (windowWidth.value < 960) {
-    return 480;
-  } else if (windowWidth.value < 1280) {
-    return 520;
-  }
+  if (windowWidth.value < 600) return 380;
+  if (windowWidth.value < 960) return 480;
+  if (windowWidth.value < 1280) return 520;
   return 560;
 });
 
-// Watch for format changes and re-highlight (only for code formats)
-watch(format, () => {
-  if (format.value !== 'card') {
-    highlightCode();
-  }
-});
-
-// Watch for content changes and re-highlight (only for code formats)
-watch(formattedContent, () => {
-  if (format.value !== 'card') {
-    highlightCode();
-  }
-});
+watch(format, () => { if (format.value !== 'card') highlightCode(); });
+watch(formattedContent, () => { if (format.value !== 'card') highlightCode(); });
 
 const handleCopy = async () => {
-  if (format.value === 'card') {
-    showSnackbar("Card view cannot be copied. Please select a code format (JSON, YAML, or TOML).", "info");
-    return;
-  }
+  if (format.value === 'card') return;
   copyLoading.value = true;
   try {
     await navigator.clipboard.writeText(formattedContent.value);
-    showSnackbar(`${format.value.toUpperCase()} copied to clipboard!`, "success");
-  } catch (e) {
-    showSnackbar("Copy failed — try selecting and copying manually.", "error");
+    showSnackbar("Copied!", "success");
   } finally {
     copyLoading.value = false;
   }
 };
 
 const handleDownload = () => {
-  if (format.value === 'card') {
-    showSnackbar("Card view cannot be downloaded. Please select a code format (JSON, YAML, or TOML).", "info");
-    return;
-  }
-  downloadLoading.value = true;
-  try {
-    let extension = 'json';
-    let mimeType = 'application/json';
-    
-    if (format.value === 'yaml') {
-      extension = 'yaml';
-      mimeType = 'text/yaml';
-    } else if (format.value === 'toml') {
-      extension = 'toml';
-      mimeType = 'text/toml';
-    }
-    
-    const blob = new Blob([formattedContent.value], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `karttik_hakimm_resume.${extension}`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    showSnackbar(`File downloaded successfully!`, "success");
-  } catch (e) {
-    showSnackbar("Download failed. Please try again.", "error");
-  } finally {
-    downloadLoading.value = false;
-  }
+  if (format.value === 'card') return;
+  const blob = new Blob([formattedContent.value], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `resume.${format.value}`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 const handlePDFExport = async () => {
-  if (format.value !== 'card') {
-    showSnackbar("PDF export only available in card view", "info");
-    return;
-  }
-  
   pdfLoading.value = true;
   try {
-    // Dynamic import to reduce bundle size
     const html2canvas = (await import('html2canvas')).default;
     const jsPDF = (await import('jspdf')).jsPDF;
-    
-    const cardContainer = document.querySelector('.card-view-container') as HTMLElement;
-    if (!cardContainer) {
-      showSnackbar("Could not find content to export", "error");
-      return;
-    }
-    
-    // Hide search bar and header for PDF
-    const searchBar = cardContainer.querySelector('.v-text-field') as HTMLElement;
-    const originalDisplay = searchBar?.style.display;
-    if (searchBar) {
-      searchBar.style.display = 'none';
-    }
-    
-    const canvas = await html2canvas(cardContainer, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: theme.global.name.value === 'dark' ? '#121212' : '#ffffff',
-    });
-    
-    // Restore search bar
-    if (searchBar) {
-      searchBar.style.display = originalDisplay || '';
-    }
-    
+    const element = document.querySelector('.card-view-container') as HTMLElement;
+    const canvas = await html2canvas(element);
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgScaledWidth = imgWidth * ratio;
-    const imgScaledHeight = imgHeight * ratio;
-    
-    // Calculate how many pages we need
-    const pageCount = Math.ceil(imgScaledHeight / pdfHeight);
-    
-    for (let i = 0; i < pageCount; i++) {
-      if (i > 0) {
-        pdf.addPage();
-      }
-      pdf.addImage(
-        imgData,
-        'PNG',
-        0,
-        -(i * pdfHeight),
-        imgScaledWidth,
-        imgScaledHeight
-      );
-    }
-    
-    pdf.save('karttik_hakimm_resume.pdf');
-    showSnackbar("PDF exported successfully!", "success");
-  } catch (error) {
-    console.error('PDF export error:', error);
-    showSnackbar("PDF export failed. Please try again.", "error");
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+    pdf.save("resume.pdf");
   } finally {
     pdfLoading.value = false;
   }
 };
-
 </script>
 
 <style scoped>
